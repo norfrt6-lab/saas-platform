@@ -1,5 +1,5 @@
 import { db } from "@saas/db";
-import { users } from "@saas/db/schema";
+import { users, type User } from "@saas/db/schema";
 import { Badge } from "@saas/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@saas/ui/card";
 import { desc } from "drizzle-orm";
@@ -46,7 +46,7 @@ export default async function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {allUsers.map((user) => (
+                {allUsers.map((user: User) => (
                   <tr key={user.id} className="border-b">
                     <td className="px-4 py-3 text-sm font-medium">{user.name}</td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">

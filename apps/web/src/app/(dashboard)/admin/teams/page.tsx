@@ -1,5 +1,5 @@
 import { db } from "@saas/db";
-import { teams } from "@saas/db/schema";
+import { teams, type Team } from "@saas/db/schema";
 import { Badge } from "@saas/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@saas/ui/card";
 import { desc } from "drizzle-orm";
@@ -47,7 +47,7 @@ export default async function AdminTeamsPage() {
                 </tr>
               </thead>
               <tbody>
-                {allTeams.map((team) => (
+                {allTeams.map((team: Team) => (
                   <tr key={team.id} className="border-b">
                     <td className="px-4 py-3 text-sm font-medium">{team.name}</td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">

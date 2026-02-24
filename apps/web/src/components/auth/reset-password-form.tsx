@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { authClient } from "@saas/auth";
 import { Button } from "@saas/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Input } from "@saas/ui/input";
 import { Label } from "@saas/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export function ResetPasswordForm() {
   const searchParams = useSearchParams();

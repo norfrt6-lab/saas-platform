@@ -1,16 +1,17 @@
-import type { Metadata } from "next";
-import { requireAuth } from "@/lib/auth-guard";
-import { getActiveTeamId } from "@/lib/tenant-middleware";
+import { getTeamUsageSummary } from "@saas/billing/feature-gate";
 import { db } from "@saas/db";
 import { teams } from "@saas/db/schema";
-import { eq } from "drizzle-orm";
-import { getTeamUsageSummary } from "@saas/billing/feature-gate";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Badge } from "@saas/ui/badge";
 import { Button } from "@saas/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Separator } from "@saas/ui/separator";
-import { UsageMeter } from "@/components/billing/usage-meter";
+import { eq } from "drizzle-orm";
 import { CreditCard, ExternalLink } from "lucide-react";
+import type { Metadata } from "next";
+
+import { UsageMeter } from "@/components/billing/usage-meter";
+import { requireAuth } from "@/lib/auth-guard";
+import { getActiveTeamId } from "@/lib/tenant-middleware";
 
 export const metadata: Metadata = {
   title: "Billing",

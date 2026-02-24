@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
-import { requireAdmin } from "@/lib/auth-guard";
 import { db } from "@saas/db";
-import { users, teams, projects } from "@saas/db/schema";
-import { count } from "drizzle-orm";
+import { projects, teams, users } from "@saas/db/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
-import { Users, Building2, FolderKanban, Activity } from "lucide-react";
+import { count } from "drizzle-orm";
+import { Building2, FolderKanban, Users } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+
+import { requireAdmin } from "@/lib/auth-guard";
 
 export const metadata: Metadata = {
   title: "Admin",

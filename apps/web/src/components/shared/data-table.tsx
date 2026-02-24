@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { Skeleton } from "@saas/ui/skeleton";
+import type { ReactNode } from "react";
 
 interface Column<T> {
   key: string;

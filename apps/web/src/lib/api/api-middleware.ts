@@ -1,7 +1,8 @@
+import { checkRateLimit } from "@saas/auth/rate-limit";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
 import { validateApiKey } from "./api-keys";
-import { checkRateLimit } from "@saas/auth/rate-limit";
 
 export interface ApiContext {
   teamId: string;

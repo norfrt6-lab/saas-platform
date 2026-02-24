@@ -1,9 +1,10 @@
+import { requireSession } from "@saas/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireSession } from "@saas/auth";
+
+import { withErrorHandler } from "@/lib/api/errors";
 import { verifyTeamMembership } from "@/lib/api/teams";
 import { setActiveTeamId } from "@/lib/tenant-middleware";
-import { withErrorHandler } from "@/lib/api/errors";
 
 export async function POST(request: NextRequest) {
   return withErrorHandler(async () => {

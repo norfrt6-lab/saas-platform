@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import Stripe from "stripe";
 import { stripe } from "@saas/billing";
 import { db } from "@saas/db";
-import { teams, processedWebhooks } from "@saas/db/schema";
-import { eq } from "drizzle-orm";
+import { processedWebhooks, teams } from "@saas/db/schema";
 import { createChildLogger } from "@saas/logger";
+import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import type Stripe from "stripe";
 
 const log = createChildLogger({ module: "stripe-webhook" });
 

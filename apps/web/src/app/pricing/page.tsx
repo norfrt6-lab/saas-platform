@@ -1,8 +1,8 @@
+import { Badge } from "@saas/ui/badge";
+import { Button } from "@saas/ui/button";
+import { Check, X } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@saas/ui/button";
-import { Badge } from "@saas/ui/badge";
-import { Check, X } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Pricing",

@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import { apiKeys } from "@saas/db/schema";
+import { describe, it, expect } from "vitest";
 
 describe("API Keys Schema", () => {
   it("should have isActive field for key revocation", () => {

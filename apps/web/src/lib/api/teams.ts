@@ -1,7 +1,9 @@
 import { db } from "@saas/db";
-import { teams, teamMembers, users } from "@saas/db/schema";
-import { eq, and } from "drizzle-orm";
+import { teamMembers, teams, users } from "@saas/db/schema";
+import { and, eq } from "drizzle-orm";
+
 import { slugify } from "@/lib/utils";
+
 import { BadRequestError, ForbiddenError } from "./errors";
 
 export async function verifyTeamMembership(

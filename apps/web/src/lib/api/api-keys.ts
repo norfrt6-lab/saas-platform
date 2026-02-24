@@ -1,9 +1,11 @@
 import crypto from "crypto";
+
+import { PLAN_LIMITS, type Plan } from "@saas/billing/plans";
 import { db } from "@saas/db";
 import { apiKeys } from "@saas/db/schema";
-import { eq, and, count } from "drizzle-orm";
-import { PLAN_LIMITS, type Plan } from "@saas/billing/plans";
 import { createChildLogger } from "@saas/logger";
+import { and, count, eq } from "drizzle-orm";
+
 import { BadRequestError } from "./errors";
 
 const log = createChildLogger({ module: "api-keys" });

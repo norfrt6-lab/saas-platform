@@ -1,9 +1,10 @@
+import { requireSession } from "@saas/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireSession } from "@saas/auth";
-import { createTeam, getUserTeams } from "@/lib/api/teams";
+
 import { createAuditLog } from "@/lib/api/audit";
 import { withErrorHandler } from "@/lib/api/errors";
+import { createTeam, getUserTeams } from "@/lib/api/teams";
 
 export async function GET() {
   return withErrorHandler(async () => {

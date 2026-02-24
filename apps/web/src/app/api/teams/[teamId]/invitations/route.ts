@@ -1,9 +1,10 @@
+import { requireSession } from "@saas/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireSession } from "@saas/auth";
-import { createInvitation, getTeamInvitations } from "@/lib/api/invitations";
+
 import { createAuditLog } from "@/lib/api/audit";
 import { withErrorHandler } from "@/lib/api/errors";
+import { createInvitation, getTeamInvitations } from "@/lib/api/invitations";
 
 export async function GET(
   _request: NextRequest,

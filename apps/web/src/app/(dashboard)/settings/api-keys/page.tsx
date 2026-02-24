@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
-import { requireAuth } from "@/lib/auth-guard";
-import { getActiveTeamId } from "@/lib/tenant-middleware";
-import { listApiKeys } from "@/lib/api/api-keys";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Badge } from "@saas/ui/badge";
 import { Button } from "@saas/ui/button";
-import { Key, Plus, Copy } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import { Key, Plus } from "lucide-react";
+import type { Metadata } from "next";
+
+import { listApiKeys } from "@/lib/api/api-keys";
+import { requireAuth } from "@/lib/auth-guard";
+import { getActiveTeamId } from "@/lib/tenant-middleware";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 export const metadata: Metadata = {

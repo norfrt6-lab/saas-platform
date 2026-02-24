@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
 import {
   checkPasswordStrength,
   isPasswordStrong,
 } from "@saas/auth/password";
+import { describe, it, expect } from "vitest";
 
 describe("checkPasswordStrength", () => {
   describe("score calculation", () => {

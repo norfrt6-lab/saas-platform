@@ -1,11 +1,12 @@
+import { requireSession } from "@saas/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireSession } from "@saas/auth";
-import { getActiveTeamId } from "@/lib/tenant-middleware";
-import { verifyTeamMembership } from "@/lib/api/teams";
-import { createProject, listProjects } from "@/lib/api/projects";
+
 import { createAuditLog } from "@/lib/api/audit";
 import { withErrorHandler } from "@/lib/api/errors";
+import { createProject, listProjects } from "@/lib/api/projects";
+import { verifyTeamMembership } from "@/lib/api/teams";
+import { getActiveTeamId } from "@/lib/tenant-middleware";
 
 export async function GET(request: NextRequest) {
   return withErrorHandler(async () => {

@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
-import { requireAuth } from "@/lib/auth-guard";
-import { getActiveTeamId } from "@/lib/tenant-middleware";
-import { listDeletedProjects } from "@/lib/api/soft-delete";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Badge } from "@saas/ui/badge";
 import { Button } from "@saas/ui/button";
+import { Card, CardContent } from "@saas/ui/card";
+import { RotateCcw, Trash2 } from "lucide-react";
+import type { Metadata } from "next";
+
+import { listDeletedProjects } from "@/lib/api/soft-delete";
+import { requireAuth } from "@/lib/auth-guard";
+import { getActiveTeamId } from "@/lib/tenant-middleware";
 import { formatDate } from "@/lib/utils";
-import { Trash2, RotateCcw } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Deleted Projects",

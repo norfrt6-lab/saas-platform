@@ -1,16 +1,16 @@
-import Link from "next/link";
-import { Button } from "@saas/ui/button";
 import { Badge } from "@saas/ui/badge";
+import { Button } from "@saas/ui/button";
 import {
-  Shield,
-  Zap,
-  Users,
-  CreditCard,
-  Code,
   Activity,
   ArrowRight,
   Check,
+  Code,
+  CreditCard,
+  Shield,
+  Users,
+  Zap,
 } from "lucide-react";
+import Link from "next/link";
 
 const features = [
   {

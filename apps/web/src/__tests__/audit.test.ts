@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import { auditLogs } from "@saas/db/schema";
+import { describe, it, expect } from "vitest";
 
 describe("Audit Log Schema", () => {
   it("should have targetType field matching code usage", () => {

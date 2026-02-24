@@ -1,5 +1,5 @@
-import { Skeleton } from "@saas/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@saas/ui/card";
+import { Skeleton } from "@saas/ui/skeleton";
 
 export function PageSkeleton() {
   return (

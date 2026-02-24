@@ -1,6 +1,7 @@
 import { db } from "@saas/db";
 import { projects } from "@saas/db/schema";
-import { eq, and, isNull, desc, lt, gt } from "drizzle-orm";
+import { and, desc, eq, isNull, lt } from "drizzle-orm";
+
 import { slugify } from "@/lib/utils";
 
 export async function createProject(params: {

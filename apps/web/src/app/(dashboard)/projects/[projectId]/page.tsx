@@ -1,13 +1,14 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { requireAuth } from "@/lib/auth-guard";
-import { getActiveTeamId } from "@/lib/tenant-middleware";
-import { getProject } from "@/lib/api/projects";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Badge } from "@saas/ui/badge";
 import { Button } from "@saas/ui/button";
-import { formatDate } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Settings, Trash2 } from "lucide-react";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+
+import { getProject } from "@/lib/api/projects";
+import { requireAuth } from "@/lib/auth-guard";
+import { getActiveTeamId } from "@/lib/tenant-middleware";
+import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Project Details",

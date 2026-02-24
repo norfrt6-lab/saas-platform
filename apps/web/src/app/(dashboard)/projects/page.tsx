@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { requireAuth } from "@/lib/auth-guard";
-import { getActiveTeamId } from "@/lib/tenant-middleware";
-import { listProjects } from "@/lib/api/projects";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Badge } from "@saas/ui/badge";
 import { Button } from "@saas/ui/button";
-import { Plus, FolderKanban } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import { FolderKanban, Plus } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+
+import { listProjects } from "@/lib/api/projects";
+import { requireAuth } from "@/lib/auth-guard";
+import { getActiveTeamId } from "@/lib/tenant-middleware";
 import { formatRelativeTime } from "@/lib/utils";
 
 export const metadata: Metadata = {

@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@saas/ui/button";
 import { Card, CardContent } from "@saas/ui/card";
 import { Sparkles } from "lucide-react";
+import Link from "next/link";
 
 interface UpgradeBannerProps {
   feature: string;

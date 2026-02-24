@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
 import { authenticateApiRequest, requireScope } from "@/lib/api/api-middleware";
-import { listProjects, createProject } from "@/lib/api/projects";
+import { createProject, listProjects } from "@/lib/api/projects";
 
 export async function GET(request: NextRequest) {
   const auth = await authenticateApiRequest(request);

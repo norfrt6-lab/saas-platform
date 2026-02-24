@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { purgeExpiredProjects } from "@/lib/api/soft-delete";
+
 import { withErrorHandler } from "@/lib/api/errors";
+import { purgeExpiredProjects } from "@/lib/api/soft-delete";
 
 /**
  * Cron endpoint: Purge expired soft-deleted projects.

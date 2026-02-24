@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { Sidebar } from "@/components/layout/sidebar";
-import { Header } from "@/components/layout/header";
+
 import { CommandPalette } from "@/components/command-palette";
+import { Header } from "@/components/layout/header";
+import { Sidebar } from "@/components/layout/sidebar";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (

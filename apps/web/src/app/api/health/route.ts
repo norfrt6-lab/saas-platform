@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
 import { db } from "@saas/db";
 import { sql } from "drizzle-orm";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

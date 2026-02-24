@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { getSession } from "@saas/auth";
+import { redirect } from "next/navigation";
 
 export async function requireAuth() {
   const session = await getSession();

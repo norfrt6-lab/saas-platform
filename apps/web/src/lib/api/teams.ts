@@ -1,7 +1,10 @@
 import { db } from "@saas/db";
-import { teams, teamMembers, users } from "@saas/db/schema";
-import { eq, and } from "drizzle-orm";
+import { teamMembers, teams, users } from "@saas/db/schema";
+import { and, eq } from "drizzle-orm";
+
 import { slugify } from "@/lib/utils";
+
+import { BadRequestError, ForbiddenError } from "./errors";
 
 export async function verifyTeamMembership(
   teamId: string,
@@ -29,11 +32,11 @@ export async function requireTeamRole(
   const membership = await verifyTeamMembership(teamId, userId);
 
   if (!membership) {
-    throw new Error("Not a member of this team");
+    throw new ForbiddenError("Not a member of this team");
   }
 
   if (!requiredRoles.includes(membership.role)) {
-    throw new Error(
+    throw new ForbiddenError(
       `Insufficient permissions. Required: ${requiredRoles.join(" or ")}`,
     );
   }
@@ -54,6 +57,10 @@ export async function createTeam(params: {
       slug,
     })
     .returning();
+
+  if (!team) {
+    throw new BadRequestError("Failed to create team");
+  }
 
   await db.insert(teamMembers).values({
     teamId: team.id,
@@ -149,7 +156,7 @@ export async function updateMemberRole(params: {
 
     const isTargetOwner = owners.some((o) => o.userId === params.targetUserId);
     if (isTargetOwner && owners.length <= 1) {
-      throw new Error("Cannot demote the last owner. Transfer ownership first.");
+      throw new BadRequestError("Cannot demote the last owner. Transfer ownership first.");
     }
   }
 
@@ -188,7 +195,7 @@ export async function removeMember(
 
   const isTargetOwner = owners.some((o) => o.userId === targetUserId);
   if (isTargetOwner && owners.length <= 1) {
-    throw new Error("Cannot remove the last owner");
+    throw new BadRequestError("Cannot remove the last owner");
   }
 
   await db

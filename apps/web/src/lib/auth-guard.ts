@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { getSession } from "@saas/auth";
+import { redirect } from "next/navigation";
 
 export async function requireAuth() {
   const session = await getSession();
@@ -15,7 +15,7 @@ export async function requireAuth() {
  */
 export async function requireAdmin() {
   const session = await requireAuth();
-  if (session.user.role !== "admin") {
+  if ((session.user as { role?: string }).role !== "admin") {
     redirect("/dashboard");
   }
   return session;

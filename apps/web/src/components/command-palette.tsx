@@ -1,22 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  LayoutDashboard,
-  FolderKanban,
-  Users,
-  CreditCard,
-  Settings,
-  Search,
-  LogOut,
-  Plus,
-  Key,
-  Activity,
-} from "lucide-react";
+import { signOut } from "@saas/auth/client";
 import { Dialog, DialogContent } from "@saas/ui/dialog";
 import { Input } from "@saas/ui/input";
-import { signOut } from "@saas/auth";
+import {
+  Activity,
+  CreditCard,
+  FolderKanban,
+  Key,
+  LayoutDashboard,
+  LogOut,
+  Plus,
+  Search,
+  Settings,
+  Users,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 interface CommandItem {
   id: string;
@@ -119,7 +119,7 @@ export function CommandPalette() {
 
   const groups = filtered.reduce<Record<string, CommandItem[]>>((acc, cmd) => {
     if (!acc[cmd.group]) acc[cmd.group] = [];
-    acc[cmd.group].push(cmd);
+    acc[cmd.group]!.push(cmd);
     return acc;
   }, {});
 

@@ -1,6 +1,7 @@
 import { db } from "@saas/db";
 import { projects } from "@saas/db/schema";
-import { eq, and, isNull, desc, lt, gt } from "drizzle-orm";
+import { and, desc, eq, isNull, lt } from "drizzle-orm";
+
 import { slugify } from "@/lib/utils";
 
 export async function createProject(params: {
@@ -98,7 +99,7 @@ export async function listProjects({
 
   const hasMore = items.length > limit;
   const data = hasMore ? items.slice(0, limit) : items;
-  const nextCursor = hasMore ? data[data.length - 1].id : null;
+  const nextCursor = hasMore ? data[data.length - 1]?.id ?? null : null;
 
   return { data, nextCursor, hasMore };
 }

@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSession } from "@saas/auth";
-import { acceptInvitation } from "@/lib/api/invitations";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Button } from "@saas/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { acceptInvitation } from "@/lib/api/invitations";
 
 export const metadata: Metadata = {
   title: "Accept Invitation",

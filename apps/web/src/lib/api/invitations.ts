@@ -1,7 +1,10 @@
+import crypto from "crypto";
+
 import { db } from "@saas/db";
 import { invitations, teamMembers } from "@saas/db/schema";
-import { eq, and } from "drizzle-orm";
-import crypto from "crypto";
+import { and, eq } from "drizzle-orm";
+
+import { BadRequestError, ConflictError, NotFoundError } from "./errors";
 import { requireTeamRole } from "./teams";
 
 function hashToken(token: string): string {
@@ -33,7 +36,7 @@ export async function createInvitation(params: {
     .limit(1);
 
   if (existing) {
-    throw new Error("An invitation is already pending for this email");
+    throw new ConflictError("An invitation is already pending for this email");
   }
 
   const token = generateToken();
@@ -51,6 +54,10 @@ export async function createInvitation(params: {
       expiresAt,
     })
     .returning();
+
+  if (!invitation) {
+    throw new BadRequestError("Failed to create invitation");
+  }
 
   return { ...invitation, plainToken: token };
 }
@@ -70,7 +77,7 @@ export async function acceptInvitation(token: string, userId: string) {
     .limit(1);
 
   if (!invitation) {
-    throw new Error("Invitation not found or already used");
+    throw new NotFoundError("Invitation not found or already used");
   }
 
   if (invitation.expiresAt < new Date()) {
@@ -78,7 +85,7 @@ export async function acceptInvitation(token: string, userId: string) {
       .update(invitations)
       .set({ status: "expired" })
       .where(eq(invitations.id, invitation.id));
-    throw new Error("Invitation has expired");
+    throw new BadRequestError("Invitation has expired");
   }
 
   await db.transaction(async (tx) => {

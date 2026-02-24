@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { requireAuth } from "@/lib/auth-guard";
-import { getActiveTeamId } from "@/lib/tenant-middleware";
-import { getTeamMembers, verifyTeamMembership } from "@/lib/api/teams";
-import { redirect } from "next/navigation";
 import { db } from "@saas/db";
 import { teams } from "@saas/db/schema";
-import { eq } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
-import { Badge } from "@saas/ui/badge";
 import { Avatar, AvatarFallback } from "@saas/ui/avatar";
+import { Badge } from "@saas/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import { eq } from "drizzle-orm";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+
+import { getTeamMembers, verifyTeamMembership } from "@/lib/api/teams";
+import { requireAuth } from "@/lib/auth-guard";
+import { getActiveTeamId } from "@/lib/tenant-middleware";
 
 export const metadata: Metadata = {
   title: "Team Settings",
@@ -33,6 +34,10 @@ export default async function TeamSettingsPage() {
     .from(teams)
     .where(eq(teams.id, teamId))
     .limit(1);
+
+  if (!team) {
+    return <div>Team not found</div>;
+  }
 
   const members = await getTeamMembers(teamId);
 

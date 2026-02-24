@@ -1,14 +1,9 @@
-import { eq, and, isNull, type SQL } from "drizzle-orm";
-import type { PgTableWithColumns, TableConfig } from "drizzle-orm/pg-core";
+import { eq, and, isNull, type SQL, type Column } from "drizzle-orm";
 import { getTenantContext } from "./context";
 
-type TableWithTeamId = PgTableWithColumns<
-  TableConfig & {
-    columns: {
-      teamId: { dataType: "string"; notNull: true };
-    };
-  }
->;
+interface TableWithTeamId {
+  teamId: Column;
+}
 
 /**
  * Applies tenant scoping to a query condition.
@@ -35,7 +30,7 @@ export function withTenantScope<T extends TableWithTeamId>(
  */
 export function withActiveTenantScope<
   T extends TableWithTeamId & {
-    deletedAt: { dataType: "date" };
+    deletedAt: Column;
   },
 >(
   table: T,

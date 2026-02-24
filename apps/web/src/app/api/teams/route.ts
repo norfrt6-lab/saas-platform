@@ -1,22 +1,21 @@
+import { requireSession } from "@saas/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireSession } from "@saas/auth";
-import { createTeam, getUserTeams } from "@/lib/api/teams";
+
 import { createAuditLog } from "@/lib/api/audit";
+import { withErrorHandler } from "@/lib/api/errors";
+import { createTeam, getUserTeams } from "@/lib/api/teams";
 
 export async function GET() {
-  try {
+  return withErrorHandler(async () => {
     const session = await requireSession();
     const teams = await getUserTeams(session.user.id);
     return NextResponse.json(teams);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
+  });
 }
 
 export async function POST(request: NextRequest) {
-  try {
+  return withErrorHandler(async () => {
     const session = await requireSession();
 
     const body = await request.json().catch(() => null);
@@ -48,14 +47,5 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(team, { status: 201 });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    if (message.includes("unique") || message.includes("duplicate")) {
-      return NextResponse.json(
-        { error: "A team with this name already exists" },
-        { status: 409 },
-      );
-    }
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
+  });
 }

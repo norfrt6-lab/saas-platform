@@ -1,5 +1,4 @@
-import { db } from "@saas/db";
-import { teams, projects, teamMembers, usageRecords } from "@saas/db/schema";
+import { db, teams, projects, teamMembers, usageRecords } from "@saas/db";
 import { eq, and, isNull, count, sum } from "drizzle-orm";
 import { PLAN_LIMITS, hasFeature, type Plan } from "./plans";
 
@@ -34,7 +33,7 @@ export async function checkProjectLimit(teamId: string): Promise<UsageCheck> {
       and(eq(projects.teamId, teamId), isNull(projects.deletedAt)),
     );
 
-  const current = result.count;
+  const current = result?.count ?? 0;
   const limit = PLAN_LIMITS[plan].maxProjects;
 
   return { allowed: current < limit, current, limit, plan };
@@ -48,7 +47,7 @@ export async function checkMemberLimit(teamId: string): Promise<UsageCheck> {
     .from(teamMembers)
     .where(eq(teamMembers.teamId, teamId));
 
-  const current = result.count;
+  const current = result?.count ?? 0;
   const limit = PLAN_LIMITS[plan].maxMembers;
 
   return { allowed: current < limit, current, limit, plan };
@@ -94,12 +93,12 @@ export async function getTeamUsageSummary(teamId: string) {
       .where(
         and(eq(projects.teamId, teamId), isNull(projects.deletedAt)),
       )
-      .then((r) => r[0].count),
+      .then((r) => r[0]?.count ?? 0),
     db
       .select({ count: count() })
       .from(teamMembers)
       .where(eq(teamMembers.teamId, teamId))
-      .then((r) => r[0].count),
+      .then((r) => r[0]?.count ?? 0),
     db
       .select({ total: sum(usageRecords.value) })
       .from(usageRecords)

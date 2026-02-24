@@ -1,8 +1,14 @@
 import crypto from "crypto";
+
+import { PLAN_LIMITS, type Plan } from "@saas/billing/plans";
 import { db } from "@saas/db";
 import { apiKeys } from "@saas/db/schema";
-import { eq, and, count } from "drizzle-orm";
-import { PLAN_LIMITS, type Plan } from "@saas/billing/plans";
+import { createChildLogger } from "@saas/logger";
+import { and, count, eq } from "drizzle-orm";
+
+import { BadRequestError } from "./errors";
+
+const log = createChildLogger({ module: "api-keys" });
 
 function hashKey(key: string): string {
   return crypto.createHash("sha256").update(key).digest("hex");
@@ -36,8 +42,8 @@ export async function createApiKey(params: {
     ? PLAN_LIMITS[params.teamPlan].maxApiKeys
     : MAX_API_KEYS_DEFAULT;
 
-  if (keyCount.count >= maxKeys) {
-    throw new Error(
+  if ((keyCount?.count ?? 0) >= maxKeys) {
+    throw new BadRequestError(
       `API key limit reached (${maxKeys}). Upgrade your plan for more keys.`,
     );
   }
@@ -102,7 +108,7 @@ export async function validateApiKey(key: string) {
       .set({ lastUsedAt: new Date() })
       .where(eq(apiKeys.id, apiKey.id))
       .then(() => {})
-      .catch(() => {});
+      .catch((err) => log.warn({ err, keyId: apiKey.id }, "Failed to update lastUsedAt"));
   }
 
   return apiKey;

@@ -1,9 +1,11 @@
-import { cookies } from "next/headers";
-import { db } from "@saas/db";
-import { teams, teamMembers } from "@saas/db/schema";
-import { eq, and } from "drizzle-orm";
-import { runWithTenant, type TenantContext } from "@saas/db/tenant";
 import { requireSession } from "@saas/auth";
+import { db } from "@saas/db";
+import { teamMembers } from "@saas/db/schema";
+import { runWithTenant, type TenantContext } from "@saas/db/tenant";
+import { and, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+
+import { BadRequestError, ForbiddenError } from "./api/errors";
 
 const TEAM_COOKIE = "active-team-id";
 
@@ -13,7 +15,7 @@ export async function withTenantContext<T>(fn: () => T): Promise<T> {
   const teamId = cookieStore.get(TEAM_COOKIE)?.value;
 
   if (!teamId) {
-    throw new Error("No active team selected");
+    throw new BadRequestError("No active team selected");
   }
 
   // Verify the user is a member of this team
@@ -31,7 +33,7 @@ export async function withTenantContext<T>(fn: () => T): Promise<T> {
     .limit(1);
 
   if (!membership) {
-    throw new Error("Not a member of this team");
+    throw new ForbiddenError("Not a member of this team");
   }
 
   const context: TenantContext = {

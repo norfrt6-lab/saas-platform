@@ -1,19 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Button } from "@saas/ui/button";
+import { cn } from "@saas/ui/utils";
 import {
-  LayoutDashboard,
-  FolderKanban,
-  Users,
+  Activity,
   CreditCard,
+  FolderKanban,
+  Key,
+  LayoutDashboard,
   Settings,
   Shield,
-  Activity,
-  Key,
+  Users,
 } from "lucide-react";
-import { cn } from "@saas/ui/utils";
-import { Button } from "@saas/ui/button";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },

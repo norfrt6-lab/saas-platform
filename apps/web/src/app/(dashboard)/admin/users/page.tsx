@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-import { requireAdmin } from "@/lib/auth-guard";
 import { db } from "@saas/db";
 import { users } from "@saas/db/schema";
-import { desc } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Badge } from "@saas/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@saas/ui/card";
+import { desc } from "drizzle-orm";
+import type { Metadata } from "next";
+
+import { requireAdmin } from "@/lib/auth-guard";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {

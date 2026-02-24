@@ -12,6 +12,7 @@
     "pino": "^9.6.0"
   },
   "devDependencies": {
+    "next": "^15.1.0",
     "typescript": "^5.7.2"
   }
 }

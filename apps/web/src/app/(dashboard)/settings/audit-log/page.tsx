@@ -1,10 +1,11 @@
+import { Badge } from "@saas/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import { Activity } from "lucide-react";
 import type { Metadata } from "next";
+
+import { getAuditLogs } from "@/lib/api/audit";
 import { requireAuth } from "@/lib/auth-guard";
 import { getActiveTeamId } from "@/lib/tenant-middleware";
-import { getAuditLogs } from "@/lib/api/audit";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
-import { Badge } from "@saas/ui/badge";
-import { Activity } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -64,11 +65,11 @@ export default async function AuditLogPage() {
                         {log.action}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {log.targetType}:{log.targetId.slice(0, 8)}
+                        {log.targetType}:{log.targetId?.slice(0, 8)}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      by {log.userId.slice(0, 8)}...
+                      by {log.userId?.slice(0, 8)}...
                       {log.ipAddress && ` from ${log.ipAddress}`}
                     </p>
                   </div>

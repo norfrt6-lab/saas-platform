@@ -1,6 +1,6 @@
 import { stripe } from "@saas/billing";
 import { db } from "@saas/db";
-import { processedWebhooks, teams } from "@saas/db/schema";
+import { processedWebhooks, teams, type ProcessedWebhook, type Team } from "@saas/db/schema";
 import { createChildLogger } from "@saas/logger";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -18,11 +18,11 @@ function isValidPlan(plan: string): plan is "free" | "pro" | "enterprise" {
 }
 
 async function isProcessed(eventId: string): Promise<boolean> {
-  const [existing] = await db
+  const [existing] = (await db
     .select()
     .from(processedWebhooks)
     .where(eq(processedWebhooks.eventId, eventId))
-    .limit(1);
+    .limit(1)) as ProcessedWebhook[];
 
   return !!existing;
 }
@@ -104,11 +104,11 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 
   if (!customerId) return;
 
-  const [team] = await db
+  const [team] = (await db
     .select()
     .from(teams)
     .where(eq(teams.stripeCustomerId, customerId))
-    .limit(1);
+    .limit(1)) as Team[];
 
   if (!team) return;
 

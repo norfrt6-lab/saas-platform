@@ -1,5 +1,5 @@
 import { db } from "@saas/db";
-import { teamMembers, teams, users } from "@saas/db/schema";
+import { teamMembers, teams, users, type Team, type TeamMember } from "@saas/db/schema";
 import { and, eq } from "drizzle-orm";
 
 import { slugify } from "@/lib/utils";
@@ -10,7 +10,7 @@ export async function verifyTeamMembership(
   teamId: string,
   userId: string,
 ): Promise<{ role: "owner" | "admin" | "member" } | null> {
-  const [membership] = await db
+  const [membership] = (await db
     .select({ role: teamMembers.role })
     .from(teamMembers)
     .where(
@@ -19,7 +19,7 @@ export async function verifyTeamMembership(
         eq(teamMembers.userId, userId),
       ),
     )
-    .limit(1);
+    .limit(1)) as { role: "owner" | "admin" | "member" }[];
 
   return membership ?? null;
 }
@@ -50,13 +50,13 @@ export async function createTeam(params: {
 }) {
   const slug = slugify(params.name);
 
-  const [team] = await db
+  const [team] = (await db
     .insert(teams)
     .values({
       name: params.name,
       slug,
     })
-    .returning();
+    .returning()) as Team[];
 
   if (!team) {
     throw new BadRequestError("Failed to create team");
@@ -83,11 +83,11 @@ export async function updateTeam(params: {
   if (params.name) updates.name = params.name;
   if (params.slug) updates.slug = slugify(params.slug);
 
-  const [team] = await db
+  const [team] = (await db
     .update(teams)
     .set({ ...updates, updatedAt: new Date() })
     .where(eq(teams.id, params.teamId))
-    .returning();
+    .returning()) as Team[];
 
   return team;
 }
@@ -101,7 +101,7 @@ export async function deleteTeam(teamId: string, userId: string) {
   });
 }
 
-export async function getUserTeams(userId: string) {
+export async function getUserTeams(userId: string): Promise<{ team: Team; role: "owner" | "admin" | "member" }[]> {
   const memberships = await db
     .select({
       team: teams,
@@ -112,10 +112,21 @@ export async function getUserTeams(userId: string) {
     .where(eq(teamMembers.userId, userId))
     .orderBy(teams.name);
 
-  return memberships;
+  return memberships as { team: Team; role: "owner" | "admin" | "member" }[];
 }
 
-export async function getTeamMembers(teamId: string) {
+export interface TeamMemberWithUser {
+  id: string;
+  userId: string;
+  teamId: string;
+  role: "owner" | "admin" | "member";
+  joinedAt: Date;
+  userName: string;
+  userEmail: string;
+  userImage: string | null;
+}
+
+export async function getTeamMembers(teamId: string): Promise<TeamMemberWithUser[]> {
   const members = await db
     .select({
       id: teamMembers.id,
@@ -132,7 +143,7 @@ export async function getTeamMembers(teamId: string) {
     .where(eq(teamMembers.teamId, teamId))
     .orderBy(teamMembers.joinedAt);
 
-  return members;
+  return members as TeamMemberWithUser[];
 }
 
 export async function updateMemberRole(params: {
@@ -144,7 +155,7 @@ export async function updateMemberRole(params: {
   await requireTeamRole(params.teamId, params.actorUserId, ["owner"]);
 
   if (params.role !== "owner") {
-    const owners = await db
+    const owners: TeamMember[] = await db
       .select()
       .from(teamMembers)
       .where(
@@ -152,7 +163,7 @@ export async function updateMemberRole(params: {
           eq(teamMembers.teamId, params.teamId),
           eq(teamMembers.role, "owner"),
         ),
-      );
+      ) as unknown as TeamMember[];
 
     const isTargetOwner = owners.some((o) => o.userId === params.targetUserId);
     if (isTargetOwner && owners.length <= 1) {
@@ -160,7 +171,7 @@ export async function updateMemberRole(params: {
     }
   }
 
-  const [member] = await db
+  const [member] = (await db
     .update(teamMembers)
     .set({ role: params.role })
     .where(
@@ -169,7 +180,7 @@ export async function updateMemberRole(params: {
         eq(teamMembers.userId, params.targetUserId),
       ),
     )
-    .returning();
+    .returning()) as TeamMember[];
 
   return member;
 }
@@ -183,7 +194,7 @@ export async function removeMember(
     await requireTeamRole(teamId, actorUserId, ["owner", "admin"]);
   }
 
-  const owners = await db
+  const owners: TeamMember[] = await db
     .select()
     .from(teamMembers)
     .where(
@@ -191,7 +202,7 @@ export async function removeMember(
         eq(teamMembers.teamId, teamId),
         eq(teamMembers.role, "owner"),
       ),
-    );
+    ) as unknown as TeamMember[];
 
   const isTargetOwner = owners.some((o) => o.userId === targetUserId);
   if (isTargetOwner && owners.length <= 1) {

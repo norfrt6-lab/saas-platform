@@ -9,6 +9,7 @@
     "clean": "rm -rf dist .turbo node_modules"
   },
   "dependencies": {
+    "@saas/db": "workspace:*",
     "stripe": "^17.5.0"
   },
   "devDependencies": {

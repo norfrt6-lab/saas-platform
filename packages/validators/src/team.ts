@@ -2,6 +2,10 @@ import { z } from "zod";
 
 export const createTeamSchema = z.object({
   name: z.string().min(2, "Team name must be at least 2 characters").max(50),
+});
+
+export const updateTeamSchema = z.object({
+  name: z.string().min(2).max(50).optional(),
   slug: z
     .string()
     .min(2)
@@ -9,29 +13,17 @@ export const createTeamSchema = z.object({
     .regex(
       /^[a-z0-9-]+$/,
       "Slug must contain only lowercase letters, numbers, and hyphens",
-    ),
-});
-
-export const updateTeamSchema = z.object({
-  id: z.string(),
-  name: z.string().min(2).max(50).optional(),
-  slug: z
-    .string()
-    .min(2)
-    .max(50)
-    .regex(/^[a-z0-9-]+$/)
+    )
     .optional(),
   logo: z.string().url().nullable().optional(),
 });
 
 export const inviteMemberSchema = z.object({
-  teamId: z.string(),
   email: z.string().email("Invalid email address"),
   role: z.enum(["admin", "member"]),
 });
 
 export const changeMemberRoleSchema = z.object({
-  teamId: z.string(),
   userId: z.string(),
   role: z.enum(["admin", "member"]),
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@saas/ui/utils";
 import { Button } from "@saas/ui/button";
@@ -26,15 +26,27 @@ interface TeamSwitcherProps {
 }
 
 export function TeamSwitcher({ teams, activeTeamId }: TeamSwitcherProps) {
+  const router = useRouter();
   const activeTeam = teams.find((t) => t.id === activeTeamId) ?? teams[0];
 
   async function switchTeam(teamId: string) {
-    await fetch("/api/teams/switch", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ teamId }),
-    });
-    window.location.reload();
+    try {
+      const response = await fetch("/api/teams/switch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamId }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        console.error("Failed to switch team:", data.error);
+        return;
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to switch team:", error);
+    }
   }
 
   return (
@@ -71,7 +83,7 @@ export function TeamSwitcher({ teams, activeTeamId }: TeamSwitcherProps) {
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push("/teams/new")}>
           <Plus className="mr-2 h-4 w-4" />
           Create team
         </DropdownMenuItem>

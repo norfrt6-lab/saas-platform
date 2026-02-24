@@ -9,6 +9,10 @@ export async function requireAuth() {
   return session;
 }
 
+/**
+ * Require platform-level admin role (not team role).
+ * Use requireTeamRole from teams.ts for team-scoped authorization.
+ */
 export async function requireAdmin() {
   const session = await requireAuth();
   if (session.user.role !== "admin") {

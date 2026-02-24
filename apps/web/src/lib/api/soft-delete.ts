@@ -1,6 +1,6 @@
 import { db } from "@saas/db";
-import { projects } from "@saas/db/schema";
-import { eq, and, isNotNull, lt } from "drizzle-orm";
+import { projects, teamMembers, invitations, apiKeys, auditLogs } from "@saas/db/schema";
+import { eq, and, isNotNull, lt, inArray } from "drizzle-orm";
 
 /**
  * Lists all soft-deleted projects for a team (trash view).
@@ -17,7 +17,7 @@ export async function listDeletedProjects(teamId: string) {
 
 /**
  * Purge job: permanently delete projects past their retention period.
- * Should be run on a cron schedule (e.g., daily).
+ * Uses batch delete instead of per-row queries.
  */
 export async function purgeExpiredProjects(): Promise<number> {
   const now = new Date();
@@ -34,11 +34,11 @@ export async function purgeExpiredProjects(): Promise<number> {
 
   if (expired.length === 0) return 0;
 
-  for (const project of expired) {
-    await db.delete(projects).where(eq(projects.id, project.id));
-  }
+  const expiredIds = expired.map((p) => p.id);
 
-  return expired.length;
+  await db.delete(projects).where(inArray(projects.id, expiredIds));
+
+  return expiredIds.length;
 }
 
 /**
@@ -67,8 +67,14 @@ export async function exportTeamProjectData(teamId: string) {
 
 /**
  * GDPR: Permanently erase all team data.
+ * Deletes all team-scoped data in the correct order to respect FK constraints.
  */
 export async function eraseTeamData(teamId: string): Promise<void> {
-  // Delete all projects (both active and soft-deleted)
-  await db.delete(projects).where(eq(projects.teamId, teamId));
+  await db.transaction(async (tx) => {
+    await tx.delete(auditLogs).where(eq(auditLogs.teamId, teamId));
+    await tx.delete(apiKeys).where(eq(apiKeys.teamId, teamId));
+    await tx.delete(invitations).where(eq(invitations.teamId, teamId));
+    await tx.delete(projects).where(eq(projects.teamId, teamId));
+    await tx.delete(teamMembers).where(eq(teamMembers.teamId, teamId));
+  });
 }

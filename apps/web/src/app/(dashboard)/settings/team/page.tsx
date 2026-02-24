@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { requireAuth } from "@/lib/auth-guard";
 import { getActiveTeamId } from "@/lib/tenant-middleware";
-import { getTeamMembers } from "@/lib/api/teams";
+import { getTeamMembers, verifyTeamMembership } from "@/lib/api/teams";
+import { redirect } from "next/navigation";
 import { db } from "@saas/db";
 import { teams } from "@saas/db/schema";
 import { eq } from "drizzle-orm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Badge } from "@saas/ui/badge";
+import { Avatar, AvatarFallback } from "@saas/ui/avatar";
 
 export const metadata: Metadata = {
   title: "Team Settings",
@@ -18,6 +20,12 @@ export default async function TeamSettingsPage() {
 
   if (!teamId) {
     return <div>No team selected</div>;
+  }
+
+  // Verify the user belongs to this team
+  const membership = await verifyTeamMembership(teamId, session.user.id);
+  if (!membership) {
+    redirect("/dashboard");
   }
 
   const [team] = await db
@@ -74,7 +82,17 @@ export default async function TeamSettingsPage() {
                 key={member.userId}
                 className="flex items-center justify-between rounded-lg border p-3"
               >
-                <div className="text-sm font-medium">{member.userId}</div>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>
+                      {member.userName?.[0]?.toUpperCase() ?? "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{member.userName}</p>
+                    <p className="text-xs text-muted-foreground">{member.userEmail}</p>
+                  </div>
+                </div>
                 <Badge variant="outline">{member.role}</Badge>
               </div>
             ))}

@@ -5,6 +5,9 @@ import { stripe } from "@saas/billing";
 import { db } from "@saas/db";
 import { teams, processedWebhooks } from "@saas/db/schema";
 import { eq } from "drizzle-orm";
+import { createChildLogger } from "@saas/logger";
+
+const log = createChildLogger({ module: "stripe-webhook" });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -38,17 +41,26 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   if (!teamId || !plan) return;
 
   if (!isValidPlan(plan)) {
-    console.error(`Invalid plan in Stripe metadata: ${plan}`);
+    log.error({ plan, teamId }, "Invalid plan in Stripe metadata");
     return;
   }
+
+  const customerId =
+    typeof session.customer === "string"
+      ? session.customer
+      : session.customer?.id ?? null;
+  const subscriptionId =
+    typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription?.id ?? null;
 
   await db
     .update(teams)
     .set({
       plan,
       billingStatus: "active",
-      stripeCustomerId: session.customer as string,
-      stripeSubscriptionId: session.subscription as string,
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscriptionId,
       updatedAt: new Date(),
     })
     .where(eq(teams.id, teamId));
@@ -85,7 +97,12 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const customerId = invoice.customer as string;
+  const customerId =
+    typeof invoice.customer === "string"
+      ? invoice.customer
+      : invoice.customer?.id;
+
+  if (!customerId) return;
 
   const [team] = await db
     .select()
@@ -157,7 +174,7 @@ export async function POST(request: NextRequest) {
 
     await markProcessed(event.id, event.type);
   } catch (error) {
-    console.error("Webhook handler error:", error);
+    log.error({ err: error, eventId: event.id, eventType: event.type }, "Webhook handler error");
     return NextResponse.json(
       { error: "Handler failed" },
       { status: 500 },

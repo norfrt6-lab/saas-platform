@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 import { users } from "./users";
 import { teams } from "./teams";
@@ -17,6 +17,7 @@ export const apiKeys = pgTable("api_keys", {
     .notNull()
     .references(() => users.id),
   scopes: text("scopes").array(),
+  isActive: boolean("is_active").default(true).notNull(),
   lastUsedAt: timestamp("last_used_at"),
   expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

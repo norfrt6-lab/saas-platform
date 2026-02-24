@@ -49,13 +49,19 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(team, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    if (message.includes("unique") || message.includes("duplicate")) {
+    // PostgreSQL unique violation: code 23505
+    if (
+      error != null &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "23505"
+    ) {
       return NextResponse.json(
         { error: "A team with this name already exists" },
         { status: 409 },
       );
     }
+    const message = error instanceof Error ? error.message : "Internal error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

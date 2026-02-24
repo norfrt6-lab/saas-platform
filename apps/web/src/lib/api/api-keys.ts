@@ -3,6 +3,9 @@ import { db } from "@saas/db";
 import { apiKeys } from "@saas/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { PLAN_LIMITS, type Plan } from "@saas/billing/plans";
+import { createChildLogger } from "@saas/logger";
+
+const log = createChildLogger({ module: "api-keys" });
 
 function hashKey(key: string): string {
   return crypto.createHash("sha256").update(key).digest("hex");
@@ -102,7 +105,7 @@ export async function validateApiKey(key: string) {
       .set({ lastUsedAt: new Date() })
       .where(eq(apiKeys.id, apiKey.id))
       .then(() => {})
-      .catch(() => {});
+      .catch((err) => log.warn({ err, keyId: apiKey.id }, "Failed to update lastUsedAt"));
   }
 
   return apiKey;

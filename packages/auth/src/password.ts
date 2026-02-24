@@ -30,7 +30,7 @@ const COMMON_PASSWORDS = new Set([
 ]);
 
 export interface PasswordStrength {
-  score: number; // 0-4
+  score: number; // 0-5
   feedback: string[];
 }
 
@@ -44,7 +44,7 @@ export function checkPasswordStrength(password: string): PasswordStrength {
   if (/\d/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
 
-  score = Math.min(score, 4);
+  score = Math.min(score, 5);
 
   if (password.length < 8) {
     feedback.push("Use at least 8 characters");
@@ -52,6 +52,10 @@ export function checkPasswordStrength(password: string): PasswordStrength {
 
   if (!/[A-Z]/.test(password)) {
     feedback.push("Add an uppercase letter");
+  }
+
+  if (!/[a-z]/.test(password)) {
+    feedback.push("Add a lowercase letter");
   }
 
   if (!/\d/.test(password)) {

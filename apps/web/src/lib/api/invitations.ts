@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-import { db } from "@saas/db";
+import { db, type Database } from "@saas/db";
 import { invitations, teamMembers, type Invitation, type TeamMember } from "@saas/db/schema";
 import { and, eq } from "drizzle-orm";
 
@@ -88,7 +88,7 @@ export async function acceptInvitation(token: string, userId: string) {
     throw new BadRequestError("Invitation has expired");
   }
 
-  await db.transaction(async (tx) => {
+  await db.transaction(async (tx: Database) => {
     const [existingMember] = (await tx
       .select()
       .from(teamMembers)

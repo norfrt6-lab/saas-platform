@@ -108,7 +108,7 @@ export async function validateApiKey(key: string) {
       .set({ lastUsedAt: new Date() })
       .where(eq(apiKeys.id, apiKey.id))
       .then(() => {})
-      .catch((err) => log.warn({ err, keyId: apiKey.id }, "Failed to update lastUsedAt"));
+      .catch((err: unknown) => log.warn({ err, keyId: apiKey.id }, "Failed to update lastUsedAt"));
   }
 
   return apiKey;

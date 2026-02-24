@@ -129,7 +129,7 @@ export default async function DashboardPage() {
                     <div className="space-y-1">
                       <p className="text-sm font-medium">{event.action}</p>
                       <p className="text-xs text-muted-foreground">
-                        {event.targetType}: {event.targetId.slice(0, 8)}...
+                        {event.targetType}: {event.targetId?.slice(0, 8)}...
                       </p>
                     </div>
                     <span className="text-xs text-muted-foreground">

@@ -1,3 +1,4 @@
 import { authHandler } from "@saas/auth";
 
-export const { GET, POST } = authHandler;
+export const GET = authHandler;
+export const POST = authHandler;

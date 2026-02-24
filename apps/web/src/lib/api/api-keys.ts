@@ -42,7 +42,7 @@ export async function createApiKey(params: {
     ? PLAN_LIMITS[params.teamPlan].maxApiKeys
     : MAX_API_KEYS_DEFAULT;
 
-  if (keyCount.count >= maxKeys) {
+  if ((keyCount?.count ?? 0) >= maxKeys) {
     throw new BadRequestError(
       `API key limit reached (${maxKeys}). Upgrade your plan for more keys.`,
     );

@@ -1,6 +1,5 @@
 "use client";
 
-import { authClient } from "@saas/auth";
 import { Button } from "@saas/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Input } from "@saas/ui/input";
@@ -20,7 +19,11 @@ export function ForgotPasswordForm() {
     setLoading(true);
 
     try {
-      await authClient.forgetPassword({ email, redirectTo: "/auth/reset-password" });
+      await fetch("/api/auth/request-password-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, redirectTo: "/auth/reset-password" }),
+      });
       setSent(true);
     } catch {
       setError("Failed to send reset email. Please try again.");

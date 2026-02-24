@@ -35,6 +35,10 @@ export default async function TeamSettingsPage() {
     .where(eq(teams.id, teamId))
     .limit(1);
 
+  if (!team) {
+    return <div>Team not found</div>;
+  }
+
   const members = await getTeamMembers(teamId);
 
   return (

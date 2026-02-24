@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [[userCount], [teamCount], [projectCount]] = await Promise.all([
+  const [userResult, teamResult, projectResult] = await Promise.all([
     db.select({ count: count() }).from(users),
     db.select({ count: count() }).from(teams),
     db.select({ count: count() }).from(projects),
@@ -24,19 +24,19 @@ export default async function AdminPage() {
   const stats = [
     {
       title: "Total Users",
-      value: userCount.count,
+      value: userResult[0]?.count ?? 0,
       icon: Users,
       href: "/admin/users",
     },
     {
       title: "Total Teams",
-      value: teamCount.count,
+      value: teamResult[0]?.count ?? 0,
       icon: Building2,
       href: "/admin/teams",
     },
     {
       title: "Total Projects",
-      value: projectCount.count,
+      value: projectResult[0]?.count ?? 0,
       icon: FolderKanban,
       href: "/admin/teams",
     },

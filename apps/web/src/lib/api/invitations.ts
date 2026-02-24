@@ -55,6 +55,10 @@ export async function createInvitation(params: {
     })
     .returning();
 
+  if (!invitation) {
+    throw new BadRequestError("Failed to create invitation");
+  }
+
   return { ...invitation, plainToken: token };
 }
 

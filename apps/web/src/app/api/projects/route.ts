@@ -66,6 +66,10 @@ export async function POST(request: NextRequest) {
       teamId,
     });
 
+    if (!project) {
+      return NextResponse.json({ error: "Failed to create project" }, { status: 500 });
+    }
+
     await createAuditLog({
       teamId,
       userId: session.user.id,

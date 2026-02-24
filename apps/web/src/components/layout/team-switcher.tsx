@@ -79,7 +79,7 @@ export function TeamSwitcher({ teams, activeTeamId }: TeamSwitcherProps) {
             onClick={() => switchTeam(team.id)}
           >
             <div className="flex h-5 w-5 items-center justify-center rounded bg-muted text-[10px] font-bold mr-2">
-              {team.name[0].toUpperCase()}
+              {team.name[0]?.toUpperCase()}
             </div>
             <span className="flex-1 truncate">{team.name}</span>
             {team.id === activeTeamId && (

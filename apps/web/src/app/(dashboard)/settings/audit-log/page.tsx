@@ -65,11 +65,11 @@ export default async function AuditLogPage() {
                         {log.action}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {log.targetType}:{log.targetId.slice(0, 8)}
+                        {log.targetType}:{log.targetId?.slice(0, 8)}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      by {log.userId.slice(0, 8)}...
+                      by {log.userId?.slice(0, 8)}...
                       {log.ipAddress && ` from ${log.ipAddress}`}
                     </p>
                   </div>

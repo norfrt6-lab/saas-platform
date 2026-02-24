@@ -58,6 +58,10 @@ export async function createTeam(params: {
     })
     .returning();
 
+  if (!team) {
+    throw new BadRequestError("Failed to create team");
+  }
+
   await db.insert(teamMembers).values({
     teamId: team.id,
     userId: params.userId,

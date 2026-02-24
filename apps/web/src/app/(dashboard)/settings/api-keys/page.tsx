@@ -92,7 +92,7 @@ export default async function ApiKeysPage() {
                       )}
                     </div>
                     <div className="flex gap-1 pt-1">
-                      {key.scopes.map((scope) => (
+                      {key.scopes?.map((scope) => (
                         <Badge key={scope} variant="secondary" className="text-xs">
                           {scope}
                         </Badge>

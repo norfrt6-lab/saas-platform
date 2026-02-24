@@ -69,7 +69,7 @@ export async function authenticateApiRequest(
     context: {
       teamId: key.teamId,
       keyId: key.id,
-      scopes: key.scopes,
+      scopes: key.scopes ?? [],
     },
   };
 }

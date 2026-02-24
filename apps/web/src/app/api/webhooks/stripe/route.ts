@@ -21,7 +21,7 @@ async function isProcessed(eventId: string): Promise<boolean> {
   const [existing] = await db
     .select()
     .from(processedWebhooks)
-    .where(eq(processedWebhooks.stripeEventId, eventId))
+    .where(eq(processedWebhooks.eventId, eventId))
     .limit(1);
 
   return !!existing;
@@ -29,7 +29,7 @@ async function isProcessed(eventId: string): Promise<boolean> {
 
 async function markProcessed(eventId: string, eventType: string) {
   await db.insert(processedWebhooks).values({
-    stripeEventId: eventId,
+    eventId,
     eventType,
   });
 }

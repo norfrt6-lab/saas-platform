@@ -99,7 +99,7 @@ export async function listProjects({
 
   const hasMore = items.length > limit;
   const data = hasMore ? items.slice(0, limit) : items;
-  const nextCursor = hasMore ? data[data.length - 1].id : null;
+  const nextCursor = hasMore ? data[data.length - 1]?.id ?? null : null;
 
   return { data, nextCursor, hasMore };
 }

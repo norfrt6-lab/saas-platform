@@ -31,6 +31,10 @@ export default async function BillingPage() {
     .where(eq(teams.id, teamId))
     .limit(1);
 
+  if (!team) {
+    return <div>Team not found</div>;
+  }
+
   const usage = await getTeamUsageSummary(teamId);
 
   return (

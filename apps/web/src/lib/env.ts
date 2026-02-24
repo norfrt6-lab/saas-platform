@@ -11,6 +11,7 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: z.string().min(32),
     MEILISEARCH_HOST: z.string().url().default("http://localhost:7700"),
     MEILISEARCH_API_KEY: z.string().min(1).default("dev_master_key"),
+    CRON_SECRET: z.string().min(16).optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -29,6 +30,7 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     MEILISEARCH_HOST: process.env.MEILISEARCH_HOST,
     MEILISEARCH_API_KEY: process.env.MEILISEARCH_API_KEY,
+    CRON_SECRET: process.env.CRON_SECRET,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:

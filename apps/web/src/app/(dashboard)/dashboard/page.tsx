@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireAuth } from "@/lib/auth-guard";
+import { getActiveTeamId } from "@/lib/tenant-middleware";
+import { listProjects } from "@/lib/api/projects";
+import { getTeamMembers } from "@/lib/api/teams";
+import { getAuditLogs } from "@/lib/api/audit";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Badge } from "@saas/ui/badge";
 import {
@@ -8,7 +13,6 @@ import {
   Activity,
   TrendingUp,
   ArrowUpRight,
-  ArrowDownRight,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -18,12 +22,10 @@ export const metadata: Metadata = {
 interface StatCardProps {
   title: string;
   value: string;
-  change: string;
-  trend: "up" | "down";
   icon: React.ComponentType<{ className?: string }>;
 }
 
-function StatCard({ title, value, change, trend, icon: Icon }: StatCardProps) {
+function StatCard({ title, value, icon: Icon }: StatCardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -32,24 +34,47 @@ function StatCard({ title, value, change, trend, icon: Icon }: StatCardProps) {
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          {trend === "up" ? (
-            <ArrowUpRight className="h-3 w-3 text-green-500" />
-          ) : (
-            <ArrowDownRight className="h-3 w-3 text-red-500" />
-          )}
-          <span className={trend === "up" ? "text-green-500" : "text-red-500"}>
-            {change}
-          </span>{" "}
-          from last month
-        </div>
       </CardContent>
     </Card>
   );
 }
 
+function formatTimeAgo(date: Date): string {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 export default async function DashboardPage() {
   const session = await requireAuth();
+  const teamId = await getActiveTeamId();
+
+  if (!teamId) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Select a team to get started
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const [projectsResult, members, auditResult] = await Promise.all([
+    listProjects({ teamId, limit: 100 }),
+    getTeamMembers(teamId),
+    getAuditLogs({ teamId, limit: 5 }),
+  ]);
+
+  const projectCount = projectsResult.data.length;
+  const memberCount = members.length;
 
   return (
     <div className="space-y-6">
@@ -63,30 +88,22 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Projects"
-          value="12"
-          change="+2"
-          trend="up"
+          value={String(projectCount)}
           icon={FolderKanban}
         />
         <StatCard
           title="Team Members"
-          value="8"
-          change="+1"
-          trend="up"
+          value={String(memberCount)}
           icon={Users}
         />
         <StatCard
-          title="API Requests"
-          value="24.5K"
-          change="+12%"
-          trend="up"
+          title="Audit Events"
+          value={String(auditResult.data.length)}
           icon={Activity}
         />
         <StatCard
-          title="Usage"
-          value="67%"
-          change="-3%"
-          trend="down"
+          title="Active"
+          value={projectCount > 0 ? "Healthy" : "Setup"}
           icon={TrendingUp}
         />
       </div>
@@ -101,44 +118,25 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                {
-                  action: "Created project",
-                  target: "marketing-site",
-                  user: session.user.name,
-                  time: "2 hours ago",
-                },
-                {
-                  action: "Invited member",
-                  target: "jane@example.com",
-                  user: session.user.name,
-                  time: "5 hours ago",
-                },
-                {
-                  action: "Updated billing",
-                  target: "Pro plan",
-                  user: session.user.name,
-                  time: "1 day ago",
-                },
-                {
-                  action: "Deployed",
-                  target: "api-v2",
-                  user: session.user.name,
-                  time: "2 days ago",
-                },
-              ].map((event, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">{event.action}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {event.target} by {event.user}
-                    </p>
+              {auditResult.data.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No activity recorded yet. Create a project to get started.
+                </p>
+              ) : (
+                auditResult.data.map((event) => (
+                  <div key={event.id} className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">{event.action}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {event.targetType}: {event.targetId.slice(0, 8)}...
+                      </p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {formatTimeAgo(new Date(event.createdAt))}
+                    </span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {event.time}
-                  </span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -150,22 +148,42 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-2">
-              {[
-                { label: "Create Project", badge: "New" },
-                { label: "Invite Member", badge: null },
-                { label: "Generate API Key", badge: null },
-                { label: "View Audit Log", badge: "3 new" },
-              ].map((action) => (
-                <div
-                  key={action.label}
-                  className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent transition-colors cursor-pointer"
-                >
-                  <span className="text-sm font-medium">{action.label}</span>
-                  {action.badge && (
-                    <Badge variant="secondary">{action.badge}</Badge>
-                  )}
-                </div>
-              ))}
+              <Link
+                href="/projects/new"
+                className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent transition-colors"
+              >
+                <span className="text-sm font-medium">Create Project</span>
+                <Badge variant="secondary">
+                  <ArrowUpRight className="h-3 w-3" />
+                </Badge>
+              </Link>
+              <Link
+                href="/settings/team"
+                className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent transition-colors"
+              >
+                <span className="text-sm font-medium">Invite Member</span>
+                <Badge variant="secondary">
+                  <ArrowUpRight className="h-3 w-3" />
+                </Badge>
+              </Link>
+              <Link
+                href="/settings/api-keys"
+                className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent transition-colors"
+              >
+                <span className="text-sm font-medium">Generate API Key</span>
+                <Badge variant="secondary">
+                  <ArrowUpRight className="h-3 w-3" />
+                </Badge>
+              </Link>
+              <Link
+                href="/settings/audit-log"
+                className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent transition-colors"
+              >
+                <span className="text-sm font-medium">View Audit Log</span>
+                <Badge variant="secondary">
+                  <ArrowUpRight className="h-3 w-3" />
+                </Badge>
+              </Link>
             </div>
           </CardContent>
         </Card>

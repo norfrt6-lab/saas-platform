@@ -9,6 +9,12 @@ export interface PlanLimits {
   features: string[];
 }
 
+/**
+ * Use Number.MAX_SAFE_INTEGER for "unlimited" to avoid JSON serialization
+ * issues with Infinity (which serializes to null).
+ */
+const UNLIMITED = Number.MAX_SAFE_INTEGER;
+
 export const PLAN_LIMITS: Record<Plan, PlanLimits> = {
   free: {
     maxProjects: 3,
@@ -35,14 +41,18 @@ export const PLAN_LIMITS: Record<Plan, PlanLimits> = {
     ],
   },
   enterprise: {
-    maxProjects: Infinity,
-    maxMembers: Infinity,
-    maxApiCallsPerMonth: Infinity,
+    maxProjects: UNLIMITED,
+    maxMembers: UNLIMITED,
+    maxApiCallsPerMonth: UNLIMITED,
     maxFileUploadMB: 1000,
     maxApiKeys: 100,
     features: ["*"],
   },
 };
+
+export function isUnlimited(value: number): boolean {
+  return value >= UNLIMITED;
+}
 
 export function hasFeature(plan: Plan, feature: string): boolean {
   const limits = PLAN_LIMITS[plan];

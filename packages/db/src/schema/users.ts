@@ -22,7 +22,10 @@ export const users = pgTable("users", {
   hashedPassword: text("hashed_password"),
   role: roleEnum("role").default("user").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => new Date()),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({

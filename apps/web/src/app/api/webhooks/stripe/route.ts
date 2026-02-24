@@ -6,7 +6,13 @@ import { db } from "@saas/db";
 import { teams, processedWebhooks } from "@saas/db/schema";
 import { eq } from "drizzle-orm";
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+const VALID_PLANS = new Set(["free", "pro", "enterprise"] as const);
+
+function isValidPlan(plan: string): plan is "free" | "pro" | "enterprise" {
+  return VALID_PLANS.has(plan as "free" | "pro" | "enterprise");
+}
 
 async function isProcessed(eventId: string): Promise<boolean> {
   const [existing] = await db
@@ -31,10 +37,15 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
   if (!teamId || !plan) return;
 
+  if (!isValidPlan(plan)) {
+    console.error(`Invalid plan in Stripe metadata: ${plan}`);
+    return;
+  }
+
   await db
     .update(teams)
     .set({
-      plan: plan as "free" | "pro" | "enterprise",
+      plan,
       billingStatus: "active",
       stripeCustomerId: session.customer as string,
       stripeSubscriptionId: session.subscription as string,
@@ -47,7 +58,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const teamId = subscription.metadata?.teamId;
   if (!teamId) return;
 
-  const status = subscription.cancel_at_period_end ? "canceling" : "active";
+  const status = subscription.cancel_at_period_end ? "canceled" : "active";
 
   await db
     .update(teams)
@@ -97,8 +108,11 @@ export async function POST(request: NextRequest) {
   const body = await request.text();
   const signature = request.headers.get("stripe-signature");
 
-  if (!signature) {
-    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
+  if (!signature || !webhookSecret) {
+    return NextResponse.json(
+      { error: !webhookSecret ? "Webhook secret not configured" : "Missing signature" },
+      { status: 400 },
+    );
   }
 
   let event: Stripe.Event;

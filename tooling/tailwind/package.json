@@ -1,0 +1,9 @@
+{
+  "name": "@saas/tailwind-config",
+  "version": "0.1.0",
+  "private": true,
+  "files": ["preset.ts"],
+  "devDependencies": {
+    "tailwindcss": "^4.0.0"
+  }
+}

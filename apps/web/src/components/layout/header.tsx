@@ -1,6 +1,6 @@
 "use client";
 
-import { signOut, useSession } from "@saas/auth";
+import { signOut, useSession } from "@saas/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@saas/ui/avatar";
 import { Button } from "@saas/ui/button";
 import {

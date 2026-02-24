@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "@saas/auth";
+import { signIn } from "@saas/auth/client";
 import { Button } from "@saas/ui/button";
 
 export function OAuthButtons() {

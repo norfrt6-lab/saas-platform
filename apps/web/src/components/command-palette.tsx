@@ -1,6 +1,6 @@
 "use client";
 
-import { signOut } from "@saas/auth";
+import { signOut } from "@saas/auth/client";
 import { Dialog, DialogContent } from "@saas/ui/dialog";
 import { Input } from "@saas/ui/input";
 import {

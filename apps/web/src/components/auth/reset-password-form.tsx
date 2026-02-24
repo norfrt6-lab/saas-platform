@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@saas/auth";
+import { authClient } from "@saas/auth/client";
 import { Button } from "@saas/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Input } from "@saas/ui/input";

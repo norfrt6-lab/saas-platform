@@ -23,7 +23,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo lint
-      - run: pnpm turbo type-check
+      - run: pnpm turbo typecheck
 
   test:
     name: Tests

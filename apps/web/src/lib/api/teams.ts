@@ -1,4 +1,4 @@
-import { db } from "@saas/db";
+import { db, type Database } from "@saas/db";
 import { teamMembers, teams, users, type Team, type TeamMember } from "@saas/db/schema";
 import { and, eq } from "drizzle-orm";
 
@@ -95,7 +95,7 @@ export async function updateTeam(params: {
 export async function deleteTeam(teamId: string, userId: string) {
   await requireTeamRole(teamId, userId, ["owner"]);
 
-  await db.transaction(async (tx) => {
+  await db.transaction(async (tx: Database) => {
     await tx.delete(teamMembers).where(eq(teamMembers.teamId, teamId));
     await tx.delete(teams).where(eq(teams.id, teamId));
   });

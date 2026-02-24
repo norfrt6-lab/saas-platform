@@ -1,4 +1,4 @@
-import { db } from "@saas/db";
+import { db, type Database } from "@saas/db";
 import { projects, teamMembers, invitations, apiKeys, auditLogs, type Project } from "@saas/db/schema";
 import { eq, and, isNotNull, lt, inArray } from "drizzle-orm";
 
@@ -71,7 +71,7 @@ export async function exportTeamProjectData(teamId: string) {
  * Deletes all team-scoped data in the correct order to respect FK constraints.
  */
 export async function eraseTeamData(teamId: string): Promise<void> {
-  await db.transaction(async (tx) => {
+  await db.transaction(async (tx: Database) => {
     await tx.delete(auditLogs).where(eq(auditLogs.teamId, teamId));
     await tx.delete(apiKeys).where(eq(apiKeys.teamId, teamId));
     await tx.delete(invitations).where(eq(invitations.teamId, teamId));

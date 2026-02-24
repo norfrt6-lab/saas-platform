@@ -73,7 +73,7 @@ export function RegisterForm() {
               id="name"
               placeholder="John Doe"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
               required
               autoComplete="name"
             />
@@ -85,7 +85,7 @@ export function RegisterForm() {
               type="email"
               placeholder="name@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               required
               autoComplete="email"
             />
@@ -97,7 +97,7 @@ export function RegisterForm() {
               type="password"
               placeholder="Min. 8 characters"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               required
               minLength={8}
               autoComplete="new-password"

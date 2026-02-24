@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "./config";
-import type { Session } from "./types";
+import { auth } from "./auth";
+import type { Session } from "./auth";
 
 export async function getSession(): Promise<Session | null> {
   const session = await auth.api.getSession({
@@ -10,7 +10,7 @@ export async function getSession(): Promise<Session | null> {
 
   if (!session) return null;
 
-  return session as unknown as Session;
+  return session as Session;
 }
 
 export async function requireSession(

@@ -41,22 +41,21 @@ export async function authenticateApiRequest(
     };
   }
 
-  // Rate limiting by API key
-  const rateLimit = checkRateLimit(`api:${key.id}`, "api");
+  // Rate limiting by API key (now async for Redis support)
+  const rateLimit = await checkRateLimit(`api:${key.id}`, "api");
   if (!rateLimit.allowed) {
+    const retryAfter = Math.ceil((rateLimit.resetAt - Date.now()) / 1000);
     return {
       error: NextResponse.json(
         {
           error: "rate_limit_exceeded",
           message: "Too many requests",
-          retryAfter: Math.ceil((rateLimit.resetAt - Date.now()) / 1000),
+          retryAfter,
         },
         {
           status: 429,
           headers: {
-            "Retry-After": String(
-              Math.ceil((rateLimit.resetAt - Date.now()) / 1000),
-            ),
+            "Retry-After": String(retryAfter),
             "X-RateLimit-Remaining": String(rateLimit.remaining),
             "X-RateLimit-Reset": String(rateLimit.resetAt),
           },

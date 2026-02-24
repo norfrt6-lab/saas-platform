@@ -1,7 +1,45 @@
 import { db } from "@saas/db";
-import { teams, teamMembers } from "@saas/db/schema";
+import { teams, teamMembers, users } from "@saas/db/schema";
 import { eq, and } from "drizzle-orm";
 import { slugify } from "@/lib/utils";
+
+export async function verifyTeamMembership(
+  teamId: string,
+  userId: string,
+): Promise<{ role: "owner" | "admin" | "member" } | null> {
+  const [membership] = await db
+    .select({ role: teamMembers.role })
+    .from(teamMembers)
+    .where(
+      and(
+        eq(teamMembers.teamId, teamId),
+        eq(teamMembers.userId, userId),
+      ),
+    )
+    .limit(1);
+
+  return membership ?? null;
+}
+
+export async function requireTeamRole(
+  teamId: string,
+  userId: string,
+  requiredRoles: Array<"owner" | "admin" | "member">,
+): Promise<{ role: "owner" | "admin" | "member" }> {
+  const membership = await verifyTeamMembership(teamId, userId);
+
+  if (!membership) {
+    throw new Error("Not a member of this team");
+  }
+
+  if (!requiredRoles.includes(membership.role)) {
+    throw new Error(
+      `Insufficient permissions. Required: ${requiredRoles.join(" or ")}`,
+    );
+  }
+
+  return membership;
+}
 
 export async function createTeam(params: {
   name: string;
@@ -17,7 +55,6 @@ export async function createTeam(params: {
     })
     .returning();
 
-  // Add creator as owner
   await db.insert(teamMembers).values({
     teamId: team.id,
     userId: params.userId,
@@ -29,9 +66,12 @@ export async function createTeam(params: {
 
 export async function updateTeam(params: {
   teamId: string;
+  userId: string;
   name?: string;
   slug?: string;
 }) {
+  await requireTeamRole(params.teamId, params.userId, ["owner", "admin"]);
+
   const updates: Record<string, unknown> = {};
   if (params.name) updates.name = params.name;
   if (params.slug) updates.slug = slugify(params.slug);
@@ -45,9 +85,13 @@ export async function updateTeam(params: {
   return team;
 }
 
-export async function deleteTeam(teamId: string) {
-  await db.delete(teamMembers).where(eq(teamMembers.teamId, teamId));
-  await db.delete(teams).where(eq(teams.id, teamId));
+export async function deleteTeam(teamId: string, userId: string) {
+  await requireTeamRole(teamId, userId, ["owner"]);
+
+  await db.transaction(async (tx) => {
+    await tx.delete(teamMembers).where(eq(teamMembers.teamId, teamId));
+    await tx.delete(teams).where(eq(teams.id, teamId));
+  });
 }
 
 export async function getUserTeams(userId: string) {
@@ -66,8 +110,18 @@ export async function getUserTeams(userId: string) {
 
 export async function getTeamMembers(teamId: string) {
   const members = await db
-    .select()
+    .select({
+      id: teamMembers.id,
+      userId: teamMembers.userId,
+      teamId: teamMembers.teamId,
+      role: teamMembers.role,
+      joinedAt: teamMembers.joinedAt,
+      userName: users.name,
+      userEmail: users.email,
+      userImage: users.image,
+    })
     .from(teamMembers)
+    .innerJoin(users, eq(teamMembers.userId, users.id))
     .where(eq(teamMembers.teamId, teamId))
     .orderBy(teamMembers.joinedAt);
 
@@ -76,16 +130,36 @@ export async function getTeamMembers(teamId: string) {
 
 export async function updateMemberRole(params: {
   teamId: string;
-  userId: string;
+  targetUserId: string;
+  actorUserId: string;
   role: "owner" | "admin" | "member";
 }) {
+  await requireTeamRole(params.teamId, params.actorUserId, ["owner"]);
+
+  if (params.role !== "owner") {
+    const owners = await db
+      .select()
+      .from(teamMembers)
+      .where(
+        and(
+          eq(teamMembers.teamId, params.teamId),
+          eq(teamMembers.role, "owner"),
+        ),
+      );
+
+    const isTargetOwner = owners.some((o) => o.userId === params.targetUserId);
+    if (isTargetOwner && owners.length <= 1) {
+      throw new Error("Cannot demote the last owner. Transfer ownership first.");
+    }
+  }
+
   const [member] = await db
     .update(teamMembers)
     .set({ role: params.role })
     .where(
       and(
         eq(teamMembers.teamId, params.teamId),
-        eq(teamMembers.userId, params.userId),
+        eq(teamMembers.userId, params.targetUserId),
       ),
     )
     .returning();
@@ -93,13 +167,36 @@ export async function updateMemberRole(params: {
   return member;
 }
 
-export async function removeMember(teamId: string, userId: string) {
+export async function removeMember(
+  teamId: string,
+  targetUserId: string,
+  actorUserId: string,
+) {
+  if (targetUserId !== actorUserId) {
+    await requireTeamRole(teamId, actorUserId, ["owner", "admin"]);
+  }
+
+  const owners = await db
+    .select()
+    .from(teamMembers)
+    .where(
+      and(
+        eq(teamMembers.teamId, teamId),
+        eq(teamMembers.role, "owner"),
+      ),
+    );
+
+  const isTargetOwner = owners.some((o) => o.userId === targetUserId);
+  if (isTargetOwner && owners.length <= 1) {
+    throw new Error("Cannot remove the last owner");
+  }
+
   await db
     .delete(teamMembers)
     .where(
       and(
         eq(teamMembers.teamId, teamId),
-        eq(teamMembers.userId, userId),
+        eq(teamMembers.userId, targetUserId),
       ),
     );
 }

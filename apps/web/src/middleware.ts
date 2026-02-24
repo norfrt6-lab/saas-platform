@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getCSP, SECURITY_HEADERS } from "@/lib/security";
 
 const publicPaths = new Set([
   "/",
@@ -12,11 +13,19 @@ const publicPaths = new Set([
   "/blog",
 ]);
 
-const publicPrefixes = ["/api/auth/", "/api/webhooks/"];
+const publicPrefixes = ["/api/auth/", "/api/webhooks/", "/api/health"];
 
 function isPublicPath(pathname: string): boolean {
   if (publicPaths.has(pathname)) return true;
   return publicPrefixes.some((prefix) => pathname.startsWith(prefix));
+}
+
+function applySecurityHeaders(response: NextResponse): NextResponse {
+  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+    response.headers.set(key, value);
+  }
+  response.headers.set("Content-Security-Policy", getCSP());
+  return response;
 }
 
 export function middleware(request: NextRequest) {
@@ -40,23 +49,20 @@ export function middleware(request: NextRequest) {
 
   // Redirect authenticated users away from auth pages
   if (isAuthenticated && pathname.startsWith("/auth/")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const response = NextResponse.redirect(new URL("/dashboard", request.url));
+    return applySecurityHeaders(response);
   }
 
   // Redirect unauthenticated users to login
   if (!isAuthenticated && !isPublic) {
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
+    const response = NextResponse.redirect(loginUrl);
+    return applySecurityHeaders(response);
   }
 
-  // Add security headers
   const response = NextResponse.next();
-  response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-
-  return response;
+  return applySecurityHeaders(response);
 }
 
 export const config = {

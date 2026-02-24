@@ -4,6 +4,7 @@ import { apiKeys } from "@saas/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { PLAN_LIMITS, type Plan } from "@saas/billing/plans";
 import { createChildLogger } from "@saas/logger";
+import { BadRequestError } from "./errors";
 
 const log = createChildLogger({ module: "api-keys" });
 
@@ -40,7 +41,7 @@ export async function createApiKey(params: {
     : MAX_API_KEYS_DEFAULT;
 
   if (keyCount.count >= maxKeys) {
-    throw new Error(
+    throw new BadRequestError(
       `API key limit reached (${maxKeys}). Upgrade your plan for more keys.`,
     );
   }

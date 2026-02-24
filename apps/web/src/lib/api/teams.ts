@@ -2,7 +2,7 @@ import { db } from "@saas/db";
 import { teams, teamMembers, users } from "@saas/db/schema";
 import { eq, and } from "drizzle-orm";
 import { slugify } from "@/lib/utils";
-import { ForbiddenError } from "./errors";
+import { BadRequestError, ForbiddenError } from "./errors";
 
 export async function verifyTeamMembership(
   teamId: string,
@@ -150,7 +150,7 @@ export async function updateMemberRole(params: {
 
     const isTargetOwner = owners.some((o) => o.userId === params.targetUserId);
     if (isTargetOwner && owners.length <= 1) {
-      throw new Error("Cannot demote the last owner. Transfer ownership first.");
+      throw new BadRequestError("Cannot demote the last owner. Transfer ownership first.");
     }
   }
 
@@ -189,7 +189,7 @@ export async function removeMember(
 
   const isTargetOwner = owners.some((o) => o.userId === targetUserId);
   if (isTargetOwner && owners.length <= 1) {
-    throw new Error("Cannot remove the last owner");
+    throw new BadRequestError("Cannot remove the last owner");
   }
 
   await db

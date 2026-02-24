@@ -34,7 +34,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
 RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
-RUN pnpm turbo build --filter=web
+RUN pnpm turbo build --filter=@saas/web
 
 # Production image
 FROM base AS runner

@@ -1,9 +1,12 @@
 import { db } from "./client";
 import { users, teams, teamMembers, projects } from "./schema";
 import { createId } from "@paralleldrive/cuid2";
+import { createChildLogger } from "@saas/logger";
+
+const log = createChildLogger({ module: "seed" });
 
 async function seed() {
-  console.log("Seeding database...");
+  log.info("Seeding database...");
 
   // Create admin user
   const adminId = createId();
@@ -66,11 +69,11 @@ async function seed() {
     },
   ]);
 
-  console.log("Seed complete.");
+  log.info("Seed complete.");
   process.exit(0);
 }
 
 seed().catch((err) => {
-  console.error("Seed failed:", err);
+  log.error({ err }, "Seed failed");
   process.exit(1);
 });

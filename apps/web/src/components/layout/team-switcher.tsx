@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@saas/ui/utils";
@@ -27,9 +28,11 @@ interface TeamSwitcherProps {
 
 export function TeamSwitcher({ teams, activeTeamId }: TeamSwitcherProps) {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   const activeTeam = teams.find((t) => t.id === activeTeamId) ?? teams[0];
 
   async function switchTeam(teamId: string) {
+    setError(null);
     try {
       const response = await fetch("/api/teams/switch", {
         method: "POST",
@@ -39,13 +42,13 @@ export function TeamSwitcher({ teams, activeTeamId }: TeamSwitcherProps) {
 
       if (!response.ok) {
         const data = await response.json();
-        console.error("Failed to switch team:", data.error);
+        setError(data.error ?? "Failed to switch team");
         return;
       }
 
       router.refresh();
-    } catch (error) {
-      console.error("Failed to switch team:", error);
+    } catch {
+      setError("Failed to switch team. Please try again.");
     }
   }
 
@@ -67,6 +70,9 @@ export function TeamSwitcher({ teams, activeTeamId }: TeamSwitcherProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Teams</DropdownMenuLabel>
+        {error && (
+          <div className="px-2 py-1 text-xs text-destructive">{error}</div>
+        )}
         <DropdownMenuSeparator />
         {teams.map((team) => (
           <DropdownMenuItem

@@ -36,9 +36,9 @@ export async function POST(request: NextRequest) {
   const scopeError = requireScope(auth.context, "projects:write");
   if (scopeError) return scopeError;
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
 
-  if (!body.name || typeof body.name !== "string") {
+  if (!body?.name || typeof body.name !== "string") {
     return NextResponse.json(
       { error: "validation_error", message: "name is required" },
       { status: 400 },

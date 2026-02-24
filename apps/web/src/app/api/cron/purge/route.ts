@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { purgeExpiredProjects } from "@/lib/api/soft-delete";
+import { withErrorHandler } from "@/lib/api/errors";
 
 /**
  * Cron endpoint: Purge expired soft-deleted projects.
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
+  return withErrorHandler(async () => {
     const purgedCount = await purgeExpiredProjects();
 
     return NextResponse.json({
@@ -28,8 +29,5 @@ export async function POST(request: Request) {
       purgedCount,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
+  });
 }

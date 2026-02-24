@@ -5,9 +5,10 @@ import { getActiveTeamId } from "@/lib/tenant-middleware";
 import { verifyTeamMembership } from "@/lib/api/teams";
 import { createProject, listProjects } from "@/lib/api/projects";
 import { createAuditLog } from "@/lib/api/audit";
+import { withErrorHandler } from "@/lib/api/errors";
 
 export async function GET(request: NextRequest) {
-  try {
+  return withErrorHandler(async () => {
     const session = await requireSession();
     const teamId = await getActiveTeamId();
 
@@ -15,7 +16,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "No team selected" }, { status: 400 });
     }
 
-    // Verify membership before reading
     const membership = await verifyTeamMembership(teamId, session.user.id);
     if (!membership) {
       return NextResponse.json({ error: "Not a member of this team" }, { status: 403 });
@@ -28,14 +28,11 @@ export async function GET(request: NextRequest) {
 
     const result = await listProjects({ teamId, cursor, limit });
     return NextResponse.json(result);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
+  });
 }
 
 export async function POST(request: NextRequest) {
-  try {
+  return withErrorHandler(async () => {
     const session = await requireSession();
     const teamId = await getActiveTeamId();
 
@@ -78,8 +75,5 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(project, { status: 201 });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
+  });
 }

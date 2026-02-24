@@ -3,9 +3,10 @@ import type { NextRequest } from "next/server";
 import { requireSession } from "@saas/auth";
 import { verifyTeamMembership } from "@/lib/api/teams";
 import { setActiveTeamId } from "@/lib/tenant-middleware";
+import { withErrorHandler } from "@/lib/api/errors";
 
 export async function POST(request: NextRequest) {
-  try {
+  return withErrorHandler(async () => {
     const session = await requireSession();
     const body = await request.json().catch(() => null);
 
@@ -16,7 +17,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify the user is actually a member of the target team
     const membership = await verifyTeamMembership(body.teamId, session.user.id);
 
     if (!membership) {
@@ -29,8 +29,5 @@ export async function POST(request: NextRequest) {
     await setActiveTeamId(body.teamId);
 
     return NextResponse.json({ success: true, teamId: body.teamId });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
+  });
 }

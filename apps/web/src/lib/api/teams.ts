@@ -2,6 +2,7 @@ import { db } from "@saas/db";
 import { teams, teamMembers, users } from "@saas/db/schema";
 import { eq, and } from "drizzle-orm";
 import { slugify } from "@/lib/utils";
+import { ForbiddenError } from "./errors";
 
 export async function verifyTeamMembership(
   teamId: string,
@@ -29,11 +30,11 @@ export async function requireTeamRole(
   const membership = await verifyTeamMembership(teamId, userId);
 
   if (!membership) {
-    throw new Error("Not a member of this team");
+    throw new ForbiddenError("Not a member of this team");
   }
 
   if (!requiredRoles.includes(membership.role)) {
-    throw new Error(
+    throw new ForbiddenError(
       `Insufficient permissions. Required: ${requiredRoles.join(" or ")}`,
     );
   }

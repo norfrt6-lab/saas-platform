@@ -16,9 +16,9 @@ export default async function AdminPage() {
   await requireAdmin();
 
   const [userResult, teamResult, projectResult] = await Promise.all([
-    db.select({ count: count() }).from(users),
-    db.select({ count: count() }).from(teams),
-    db.select({ count: count() }).from(projects),
+    db.select({ count: count() }).from(users) as Promise<{ count: number }[]>,
+    db.select({ count: count() }).from(teams) as Promise<{ count: number }[]>,
+    db.select({ count: count() }).from(projects) as Promise<{ count: number }[]>,
   ]);
 
   const stats = [

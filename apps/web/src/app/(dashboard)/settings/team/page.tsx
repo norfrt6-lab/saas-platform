@@ -1,5 +1,5 @@
 import { db } from "@saas/db";
-import { teams } from "@saas/db/schema";
+import { teams, type Team } from "@saas/db/schema";
 import { Avatar, AvatarFallback } from "@saas/ui/avatar";
 import { Badge } from "@saas/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
@@ -29,11 +29,11 @@ export default async function TeamSettingsPage() {
     redirect("/dashboard");
   }
 
-  const [team] = await db
+  const [team] = (await db
     .select()
     .from(teams)
     .where(eq(teams.id, teamId))
-    .limit(1);
+    .limit(1)) as Team[];
 
   if (!team) {
     return <div>Team not found</div>;

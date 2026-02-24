@@ -19,7 +19,7 @@ export async function withTenantContext<T>(fn: () => T): Promise<T> {
   }
 
   // Verify the user is a member of this team
-  const [membership] = await db
+  const [membership] = (await db
     .select({
       role: teamMembers.role,
     })
@@ -30,7 +30,7 @@ export async function withTenantContext<T>(fn: () => T): Promise<T> {
         eq(teamMembers.userId, session.user.id),
       ),
     )
-    .limit(1);
+    .limit(1)) as { role: "owner" | "admin" | "member" }[];
 
   if (!membership) {
     throw new ForbiddenError("Not a member of this team");

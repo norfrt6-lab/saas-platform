@@ -59,11 +59,16 @@ jobs:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
 
       - name: Health check
-        if: ${{ secrets.PRODUCTION_URL != '' }}
         continue-on-error: true
+        env:
+          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
         run: |
+          if [ -z "$PRODUCTION_URL" ]; then
+            echo "PRODUCTION_URL not set, skipping health check"
+            exit 0
+          fi
           for i in 1 2 3 4 5; do
-            STATUS=$(curl -sf "${{ secrets.PRODUCTION_URL }}/api/health" | jq -r '.status' 2>/dev/null)
+            STATUS=$(curl -sf "$PRODUCTION_URL/api/health" | jq -r '.status' 2>/dev/null)
             if [ "$STATUS" = "healthy" ] || [ "$STATUS" = "degraded" ]; then
               echo "Health check passed: $STATUS"
               exit 0

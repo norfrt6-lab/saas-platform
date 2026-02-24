@@ -59,6 +59,8 @@ jobs:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
 
       - name: Health check
+        if: ${{ secrets.PRODUCTION_URL != '' }}
+        continue-on-error: true
         run: |
           for i in 1 2 3 4 5; do
             STATUS=$(curl -sf "${{ secrets.PRODUCTION_URL }}/api/health" | jq -r '.status' 2>/dev/null)

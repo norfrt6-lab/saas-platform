@@ -1,31 +1,29 @@
+import { requireSession } from "@saas/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireSession } from "@saas/auth";
-import { createInvitation, getTeamInvitations } from "@/lib/api/invitations";
+
 import { createAuditLog } from "@/lib/api/audit";
+import { withErrorHandler } from "@/lib/api/errors";
+import { createInvitation, getTeamInvitations } from "@/lib/api/invitations";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ teamId: string }> },
 ) {
-  try {
+  return withErrorHandler(async () => {
     const session = await requireSession();
     const { teamId } = await params;
 
     const invites = await getTeamInvitations(teamId, session.user.id);
     return NextResponse.json(invites);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    const status = message.includes("Not a member") ? 403 : 500;
-    return NextResponse.json({ error: message }, { status });
-  }
+  });
 }
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ teamId: string }> },
 ) {
-  try {
+  return withErrorHandler(async () => {
     const session = await requireSession();
     const { teamId } = await params;
 
@@ -57,14 +55,5 @@ export async function POST(
     });
 
     return NextResponse.json(invitation, { status: 201 });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    if (message.includes("Not a member") || message.includes("Insufficient")) {
-      return NextResponse.json({ error: message }, { status: 403 });
-    }
-    if (message.includes("already pending")) {
-      return NextResponse.json({ error: message }, { status: 409 });
-    }
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
+  });
 }

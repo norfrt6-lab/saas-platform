@@ -1,16 +1,17 @@
-import type { Metadata } from "next";
-import { requireAuth } from "@/lib/auth-guard";
-import { getActiveTeamId } from "@/lib/tenant-middleware";
-import { db } from "@saas/db";
-import { teams } from "@saas/db/schema";
-import { eq } from "drizzle-orm";
 import { getTeamUsageSummary } from "@saas/billing/feature-gate";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import { db } from "@saas/db";
+import { teams, type Team } from "@saas/db/schema";
 import { Badge } from "@saas/ui/badge";
 import { Button } from "@saas/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Separator } from "@saas/ui/separator";
-import { UsageMeter } from "@/components/billing/usage-meter";
+import { eq } from "drizzle-orm";
 import { CreditCard, ExternalLink } from "lucide-react";
+import type { Metadata } from "next";
+
+import { UsageMeter } from "@/components/billing/usage-meter";
+import { requireAuth } from "@/lib/auth-guard";
+import { getActiveTeamId } from "@/lib/tenant-middleware";
 
 export const metadata: Metadata = {
   title: "Billing",
@@ -24,11 +25,15 @@ export default async function BillingPage() {
     return <div>No team selected</div>;
   }
 
-  const [team] = await db
+  const [team] = (await db
     .select()
     .from(teams)
     .where(eq(teams.id, teamId))
-    .limit(1);
+    .limit(1)) as Team[];
+
+  if (!team) {
+    return <div>Team not found</div>;
+  }
 
   const usage = await getTeamUsageSummary(teamId);
 

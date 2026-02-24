@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
 import { authenticateApiRequest, requireScope } from "@/lib/api/api-middleware";
-import { listProjects, createProject } from "@/lib/api/projects";
+import { createProject, listProjects } from "@/lib/api/projects";
 
 export async function GET(request: NextRequest) {
   const auth = await authenticateApiRequest(request);
@@ -36,9 +37,9 @@ export async function POST(request: NextRequest) {
   const scopeError = requireScope(auth.context, "projects:write");
   if (scopeError) return scopeError;
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
 
-  if (!body.name || typeof body.name !== "string") {
+  if (!body?.name || typeof body.name !== "string") {
     return NextResponse.json(
       { error: "validation_error", message: "name is required" },
       { status: 400 },

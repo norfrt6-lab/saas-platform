@@ -11,12 +11,12 @@ Designed for 10k+ tenants | 99.9% uptime target | Sub-200ms P95 API response
 - **Monorepo:** Turborepo
 - **Database:** PostgreSQL 16 + Drizzle ORM
 - **Auth:** Better Auth
-- **API:** tRPC v11 (internal) + REST/OpenAPI (external)
+- **API:** tRPC v11 (internal) + REST (external)
 - **Payments:** Stripe (Subscriptions + Metered Billing)
 - **Background Jobs:** Trigger.dev
 - **Caching:** Redis (Upstash) + Next.js Cache
 - **UI:** Tailwind CSS 4 + shadcn/ui + Radix + Framer Motion
-- **Testing:** Vitest + Playwright + k6
+- **Testing:** Vitest
 - **CI/CD:** GitHub Actions
 
 ## Architecture
@@ -37,8 +37,8 @@ Request → Edge Middleware → Tenant Context → tRPC Router → Service Layer
 - Cursor-based pagination everywhere
 - GDPR: data export + tenant erasure
 - Immutable audit logging
-- 4-layer caching (CDN > Next.js > Redis > DB)
-- 330+ tests: unit, integration, E2E, security, load
+- Caching: Next.js Cache + Redis
+- Unit and integration tests (Vitest)
 - Architecture Decision Records (ADRs)
 - Production runbooks
 

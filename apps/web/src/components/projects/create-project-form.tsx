@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@saas/ui/button";
+import { Card, CardContent } from "@saas/ui/card";
 import { Input } from "@saas/ui/input";
 import { Label } from "@saas/ui/label";
-import { Card, CardContent } from "@saas/ui/card";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export function CreateProjectForm() {
   const router = useRouter();
@@ -55,7 +55,7 @@ export function CreateProjectForm() {
               id="name"
               placeholder="My Awesome Project"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
               required
             />
           </div>
@@ -65,7 +65,7 @@ export function CreateProjectForm() {
               id="description"
               placeholder="A brief description of your project"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
             />
           </div>
           <div className="flex gap-3">

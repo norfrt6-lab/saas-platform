@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
 import { checkPasswordStrength } from "@saas/auth/password";
+import { useMemo } from "react";
 
 const STRENGTH_LABELS = ["Very weak", "Weak", "Fair", "Strong", "Very strong"];
 const STRENGTH_COLORS = [

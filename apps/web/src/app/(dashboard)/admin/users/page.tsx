@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-import { requireAdmin } from "@/lib/auth-guard";
 import { db } from "@saas/db";
-import { users } from "@saas/db/schema";
-import { desc } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import { users, type User } from "@saas/db/schema";
 import { Badge } from "@saas/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@saas/ui/card";
+import { desc } from "drizzle-orm";
+import type { Metadata } from "next";
+
+import { requireAdmin } from "@/lib/auth-guard";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -45,7 +46,7 @@ export default async function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {allUsers.map((user) => (
+                {allUsers.map((user: User) => (
                   <tr key={user.id} className="border-b">
                     <td className="px-4 py-3 text-sm font-medium">{user.name}</td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">

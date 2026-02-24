@@ -1,7 +1,10 @@
-import { db } from "@saas/db";
-import { invitations, teamMembers } from "@saas/db/schema";
-import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
+
+import { db, type Database } from "@saas/db";
+import { invitations, teamMembers, type Invitation, type TeamMember } from "@saas/db/schema";
+import { and, eq } from "drizzle-orm";
+
+import { BadRequestError, ConflictError, NotFoundError } from "./errors";
 import { requireTeamRole } from "./teams";
 
 function hashToken(token: string): string {
@@ -20,7 +23,7 @@ export async function createInvitation(params: {
 }) {
   await requireTeamRole(params.teamId, params.invitedBy, ["owner", "admin"]);
 
-  const [existing] = await db
+  const [existing] = (await db
     .select()
     .from(invitations)
     .where(
@@ -30,17 +33,17 @@ export async function createInvitation(params: {
         eq(invitations.status, "pending"),
       ),
     )
-    .limit(1);
+    .limit(1)) as Invitation[];
 
   if (existing) {
-    throw new Error("An invitation is already pending for this email");
+    throw new ConflictError("An invitation is already pending for this email");
   }
 
   const token = generateToken();
   const hashedToken = hashToken(token);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-  const [invitation] = await db
+  const [invitation] = (await db
     .insert(invitations)
     .values({
       teamId: params.teamId,
@@ -50,7 +53,11 @@ export async function createInvitation(params: {
       token: hashedToken,
       expiresAt,
     })
-    .returning();
+    .returning()) as Invitation[];
+
+  if (!invitation) {
+    throw new BadRequestError("Failed to create invitation");
+  }
 
   return { ...invitation, plainToken: token };
 }
@@ -58,7 +65,7 @@ export async function createInvitation(params: {
 export async function acceptInvitation(token: string, userId: string) {
   const hashedToken = hashToken(token);
 
-  const [invitation] = await db
+  const [invitation] = (await db
     .select()
     .from(invitations)
     .where(
@@ -67,10 +74,10 @@ export async function acceptInvitation(token: string, userId: string) {
         eq(invitations.status, "pending"),
       ),
     )
-    .limit(1);
+    .limit(1)) as Invitation[];
 
   if (!invitation) {
-    throw new Error("Invitation not found or already used");
+    throw new NotFoundError("Invitation not found or already used");
   }
 
   if (invitation.expiresAt < new Date()) {
@@ -78,11 +85,11 @@ export async function acceptInvitation(token: string, userId: string) {
       .update(invitations)
       .set({ status: "expired" })
       .where(eq(invitations.id, invitation.id));
-    throw new Error("Invitation has expired");
+    throw new BadRequestError("Invitation has expired");
   }
 
-  await db.transaction(async (tx) => {
-    const [existingMember] = await tx
+  await db.transaction(async (tx: Database) => {
+    const [existingMember] = (await tx
       .select()
       .from(teamMembers)
       .where(
@@ -91,7 +98,7 @@ export async function acceptInvitation(token: string, userId: string) {
           eq(teamMembers.userId, userId),
         ),
       )
-      .limit(1);
+      .limit(1)) as TeamMember[];
 
     if (!existingMember) {
       await tx.insert(teamMembers).values({
@@ -113,7 +120,7 @@ export async function acceptInvitation(token: string, userId: string) {
 export async function getTeamInvitations(
   teamId: string,
   userId: string,
-) {
+): Promise<Invitation[]> {
   await requireTeamRole(teamId, userId, ["owner", "admin", "member"]);
 
   return db
@@ -125,7 +132,7 @@ export async function getTeamInvitations(
         eq(invitations.status, "pending"),
       ),
     )
-    .orderBy(invitations.createdAt);
+    .orderBy(invitations.createdAt) as unknown as Promise<Invitation[]>;
 }
 
 export async function revokeInvitation(

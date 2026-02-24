@@ -1,6 +1,7 @@
 import { db } from "@saas/db";
-import { projects } from "@saas/db/schema";
-import { eq, and, isNull, desc, lt, gt } from "drizzle-orm";
+import { projects, type Project } from "@saas/db/schema";
+import { and, desc, eq, isNull, lt } from "drizzle-orm";
+
 import { slugify } from "@/lib/utils";
 
 export async function createProject(params: {
@@ -10,7 +11,7 @@ export async function createProject(params: {
 }) {
   const slug = slugify(params.name);
 
-  const [project] = await db
+  const [project] = (await db
     .insert(projects)
     .values({
       name: params.name,
@@ -18,7 +19,7 @@ export async function createProject(params: {
       description: params.description ?? null,
       teamId: params.teamId,
     })
-    .returning();
+    .returning()) as Project[];
 
   return project;
 }
@@ -38,7 +39,7 @@ export async function updateProject(params: {
     updates.description = params.description;
   }
 
-  const [project] = await db
+  const [project] = (await db
     .update(projects)
     .set(updates)
     .where(
@@ -48,13 +49,13 @@ export async function updateProject(params: {
         isNull(projects.deletedAt),
       ),
     )
-    .returning();
+    .returning()) as Project[];
 
   return project;
 }
 
 export async function getProject(projectId: string, teamId: string) {
-  const [project] = await db
+  const [project] = (await db
     .select()
     .from(projects)
     .where(
@@ -64,7 +65,7 @@ export async function getProject(projectId: string, teamId: string) {
         isNull(projects.deletedAt),
       ),
     )
-    .limit(1);
+    .limit(1)) as Project[];
 
   return project ?? null;
 }
@@ -79,7 +80,7 @@ export async function listProjects({
   teamId,
   cursor,
   limit = 20,
-}: ListProjectsParams) {
+}: ListProjectsParams): Promise<{ data: Project[]; nextCursor: string | null; hasMore: boolean }> {
   const conditions = [
     eq(projects.teamId, teamId),
     isNull(projects.deletedAt),
@@ -89,16 +90,16 @@ export async function listProjects({
     conditions.push(lt(projects.id, cursor));
   }
 
-  const items = await db
+  const items: Project[] = (await db
     .select()
     .from(projects)
     .where(and(...conditions))
     .orderBy(desc(projects.createdAt))
-    .limit(limit + 1);
+    .limit(limit + 1)) as unknown as Project[];
 
   const hasMore = items.length > limit;
   const data = hasMore ? items.slice(0, limit) : items;
-  const nextCursor = hasMore ? data[data.length - 1].id : null;
+  const nextCursor = hasMore ? data[data.length - 1]?.id ?? null : null;
 
   return { data, nextCursor, hasMore };
 }
@@ -110,7 +111,7 @@ export async function softDeleteProject(params: {
 }) {
   const scheduledPurgeAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-  const [project] = await db
+  const [project] = (await db
     .update(projects)
     .set({
       deletedAt: new Date(),
@@ -124,13 +125,13 @@ export async function softDeleteProject(params: {
         isNull(projects.deletedAt),
       ),
     )
-    .returning();
+    .returning()) as Project[];
 
   return project;
 }
 
 export async function restoreProject(projectId: string, teamId: string) {
-  const [project] = await db
+  const [project] = (await db
     .update(projects)
     .set({
       deletedAt: null,
@@ -143,7 +144,7 @@ export async function restoreProject(projectId: string, teamId: string) {
         eq(projects.teamId, teamId),
       ),
     )
-    .returning();
+    .returning()) as Project[];
 
   return project;
 }

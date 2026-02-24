@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { signUp } from "@saas/auth";
+import { signUp } from "@saas/auth/client";
 import { Button } from "@saas/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@saas/ui/card";
 import { Input } from "@saas/ui/input";
 import { Label } from "@saas/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@saas/ui/card";
 import { Separator } from "@saas/ui/separator";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { OAuthButtons } from "./oauth-buttons";
 
 export function RegisterForm() {
@@ -72,7 +73,7 @@ export function RegisterForm() {
               id="name"
               placeholder="John Doe"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
               required
               autoComplete="name"
             />
@@ -84,7 +85,7 @@ export function RegisterForm() {
               type="email"
               placeholder="name@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               required
               autoComplete="email"
             />
@@ -96,7 +97,7 @@ export function RegisterForm() {
               type="password"
               placeholder="Min. 8 characters"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               required
               minLength={8}
               autoComplete="new-password"

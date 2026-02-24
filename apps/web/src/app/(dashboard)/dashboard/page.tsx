@@ -1,19 +1,20 @@
+import { Badge } from "@saas/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import {
+  Activity,
+  ArrowUpRight,
+  FolderKanban,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { requireAuth } from "@/lib/auth-guard";
-import { getActiveTeamId } from "@/lib/tenant-middleware";
+
+import { getAuditLogs } from "@/lib/api/audit";
 import { listProjects } from "@/lib/api/projects";
 import { getTeamMembers } from "@/lib/api/teams";
-import { getAuditLogs } from "@/lib/api/audit";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
-import { Badge } from "@saas/ui/badge";
-import {
-  FolderKanban,
-  Users,
-  Activity,
-  TrendingUp,
-  ArrowUpRight,
-} from "lucide-react";
+import { requireAuth } from "@/lib/auth-guard";
+import { getActiveTeamId } from "@/lib/tenant-middleware";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -51,7 +52,7 @@ function formatTimeAgo(date: Date): string {
 }
 
 export default async function DashboardPage() {
-  const session = await requireAuth();
+  const _session = await requireAuth();
   const teamId = await getActiveTeamId();
 
   if (!teamId) {
@@ -128,7 +129,7 @@ export default async function DashboardPage() {
                     <div className="space-y-1">
                       <p className="text-sm font-medium">{event.action}</p>
                       <p className="text-xs text-muted-foreground">
-                        {event.targetType}: {event.targetId.slice(0, 8)}...
+                        {event.targetType}: {event.targetId?.slice(0, 8)}...
                       </p>
                     </div>
                     <span className="text-xs text-muted-foreground">

@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { signOut, useSession } from "@saas/auth";
+import { signOut, useSession } from "@saas/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@saas/ui/avatar";
 import { Button } from "@saas/ui/button";
 import {
@@ -12,7 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@saas/ui/dropdown-menu";
-import { LogOut, User, Settings, Moon, Sun } from "lucide-react";
+import { LogOut, Settings, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function Header() {
   const router = useRouter();

@@ -1,18 +1,19 @@
-import { db } from "@saas/db";
-import { projects, teamMembers, invitations, apiKeys, auditLogs } from "@saas/db/schema";
+import { db, type Database } from "@saas/db";
+import { projects, teamMembers, invitations, apiKeys, auditLogs, type Project } from "@saas/db/schema";
 import { eq, and, isNotNull, lt, inArray } from "drizzle-orm";
 
 /**
  * Lists all soft-deleted projects for a team (trash view).
  */
-export async function listDeletedProjects(teamId: string) {
-  return db
+export async function listDeletedProjects(teamId: string): Promise<Project[]> {
+  const result = await db
     .select()
     .from(projects)
     .where(
       and(eq(projects.teamId, teamId), isNotNull(projects.deletedAt)),
     )
     .orderBy(projects.deletedAt);
+  return result as Project[];
 }
 
 /**
@@ -22,7 +23,7 @@ export async function listDeletedProjects(teamId: string) {
 export async function purgeExpiredProjects(): Promise<number> {
   const now = new Date();
 
-  const expired = await db
+  const expired: { id: string }[] = await db
     .select({ id: projects.id })
     .from(projects)
     .where(
@@ -45,10 +46,10 @@ export async function purgeExpiredProjects(): Promise<number> {
  * GDPR: Export all project data for a team.
  */
 export async function exportTeamProjectData(teamId: string) {
-  const allProjects = await db
+  const allProjects: Project[] = await db
     .select()
     .from(projects)
-    .where(eq(projects.teamId, teamId));
+    .where(eq(projects.teamId, teamId)) as unknown as Project[];
 
   return {
     exportedAt: new Date().toISOString(),
@@ -70,7 +71,7 @@ export async function exportTeamProjectData(teamId: string) {
  * Deletes all team-scoped data in the correct order to respect FK constraints.
  */
 export async function eraseTeamData(teamId: string): Promise<void> {
-  await db.transaction(async (tx) => {
+  await db.transaction(async (tx: Database) => {
     await tx.delete(auditLogs).where(eq(auditLogs.teamId, teamId));
     await tx.delete(apiKeys).where(eq(apiKeys.teamId, teamId));
     await tx.delete(invitations).where(eq(invitations.teamId, teamId));

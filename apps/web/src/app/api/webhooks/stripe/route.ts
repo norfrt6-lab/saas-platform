@@ -1,26 +1,35 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import Stripe from "stripe";
 import { stripe } from "@saas/billing";
 import { db } from "@saas/db";
-import { teams, processedWebhooks } from "@saas/db/schema";
+import { processedWebhooks, teams, type ProcessedWebhook, type Team } from "@saas/db/schema";
+import { createChildLogger } from "@saas/logger";
 import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import type Stripe from "stripe";
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const log = createChildLogger({ module: "stripe-webhook" });
+
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+const VALID_PLANS = new Set(["free", "pro", "enterprise"] as const);
+
+function isValidPlan(plan: string): plan is "free" | "pro" | "enterprise" {
+  return VALID_PLANS.has(plan as "free" | "pro" | "enterprise");
+}
 
 async function isProcessed(eventId: string): Promise<boolean> {
-  const [existing] = await db
+  const [existing] = (await db
     .select()
     .from(processedWebhooks)
-    .where(eq(processedWebhooks.stripeEventId, eventId))
-    .limit(1);
+    .where(eq(processedWebhooks.eventId, eventId))
+    .limit(1)) as ProcessedWebhook[];
 
   return !!existing;
 }
 
 async function markProcessed(eventId: string, eventType: string) {
   await db.insert(processedWebhooks).values({
-    stripeEventId: eventId,
+    eventId,
     eventType,
   });
 }
@@ -31,13 +40,27 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
   if (!teamId || !plan) return;
 
+  if (!isValidPlan(plan)) {
+    log.error({ plan, teamId }, "Invalid plan in Stripe metadata");
+    return;
+  }
+
+  const customerId =
+    typeof session.customer === "string"
+      ? session.customer
+      : session.customer?.id ?? null;
+  const subscriptionId =
+    typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription?.id ?? null;
+
   await db
     .update(teams)
     .set({
-      plan: plan as "free" | "pro" | "enterprise",
+      plan,
       billingStatus: "active",
-      stripeCustomerId: session.customer as string,
-      stripeSubscriptionId: session.subscription as string,
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscriptionId,
       updatedAt: new Date(),
     })
     .where(eq(teams.id, teamId));
@@ -47,7 +70,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const teamId = subscription.metadata?.teamId;
   if (!teamId) return;
 
-  const status = subscription.cancel_at_period_end ? "canceling" : "active";
+  const status = subscription.cancel_at_period_end ? "canceled" : "active";
 
   await db
     .update(teams)
@@ -74,13 +97,18 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const customerId = invoice.customer as string;
+  const customerId =
+    typeof invoice.customer === "string"
+      ? invoice.customer
+      : invoice.customer?.id;
 
-  const [team] = await db
+  if (!customerId) return;
+
+  const [team] = (await db
     .select()
     .from(teams)
     .where(eq(teams.stripeCustomerId, customerId))
-    .limit(1);
+    .limit(1)) as Team[];
 
   if (!team) return;
 
@@ -97,8 +125,11 @@ export async function POST(request: NextRequest) {
   const body = await request.text();
   const signature = request.headers.get("stripe-signature");
 
-  if (!signature) {
-    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
+  if (!signature || !webhookSecret) {
+    return NextResponse.json(
+      { error: !webhookSecret ? "Webhook secret not configured" : "Missing signature" },
+      { status: 400 },
+    );
   }
 
   let event: Stripe.Event;
@@ -143,7 +174,7 @@ export async function POST(request: NextRequest) {
 
     await markProcessed(event.id, event.type);
   } catch (error) {
-    console.error("Webhook handler error:", error);
+    log.error({ err: error, eventId: event.id, eventType: event.type }, "Webhook handler error");
     return NextResponse.json(
       { error: "Handler failed" },
       { status: 500 },

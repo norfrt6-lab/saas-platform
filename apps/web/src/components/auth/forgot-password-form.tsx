@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { authClient } from "@saas/auth";
 import { Button } from "@saas/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Input } from "@saas/ui/input";
 import { Label } from "@saas/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import Link from "next/link";
+import { useState } from "react";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -20,7 +19,11 @@ export function ForgotPasswordForm() {
     setLoading(true);
 
     try {
-      await authClient.forgetPassword({ email, redirectTo: "/auth/reset-password" });
+      await fetch("/api/auth/request-password-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, redirectTo: "/auth/reset-password" }),
+      });
       setSent(true);
     } catch {
       setError("Failed to send reset email. Please try again.");
@@ -69,7 +72,7 @@ export function ForgotPasswordForm() {
               type="email"
               placeholder="name@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               required
               autoComplete="email"
             />

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { authClient } from "@saas/auth";
+import { authClient } from "@saas/auth/client";
 import { Button } from "@saas/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { Input } from "@saas/ui/input";
 import { Label } from "@saas/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -87,7 +87,7 @@ export function ResetPasswordForm() {
               type="password"
               placeholder="Min. 8 characters"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               required
               minLength={8}
               autoComplete="new-password"
@@ -99,7 +99,7 @@ export function ResetPasswordForm() {
               id="confirmPassword"
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
               required
               minLength={8}
               autoComplete="new-password"

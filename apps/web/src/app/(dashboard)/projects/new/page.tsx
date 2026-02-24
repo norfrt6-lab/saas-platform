@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { requireAuth } from "@/lib/auth-guard";
+
 import { CreateProjectForm } from "@/components/projects/create-project-form";
+import { requireAuth } from "@/lib/auth-guard";
 
 export const metadata: Metadata = {
   title: "Create Project",

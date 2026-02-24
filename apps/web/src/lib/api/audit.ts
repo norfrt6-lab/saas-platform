@@ -1,5 +1,5 @@
 import { db } from "@saas/db";
-import { auditLogs } from "@saas/db/schema";
+import { auditLogs, type AuditLog } from "@saas/db/schema";
 import { eq, and, desc, lt } from "drizzle-orm";
 
 export type AuditAction =
@@ -50,7 +50,7 @@ export async function getAuditLogs(params: {
   cursor?: string;
   limit?: number;
   action?: AuditAction;
-}) {
+}): Promise<{ data: AuditLog[]; nextCursor: string | null; hasMore: boolean }> {
   const { teamId, cursor, limit = 50, action } = params;
 
   const conditions = [eq(auditLogs.teamId, teamId)];
@@ -63,16 +63,16 @@ export async function getAuditLogs(params: {
     conditions.push(eq(auditLogs.action, action));
   }
 
-  const items = await db
+  const items: AuditLog[] = (await db
     .select()
     .from(auditLogs)
     .where(and(...conditions))
     .orderBy(desc(auditLogs.createdAt))
-    .limit(limit + 1);
+    .limit(limit + 1)) as unknown as AuditLog[];
 
   const hasMore = items.length > limit;
   const data = hasMore ? items.slice(0, limit) : items;
-  const nextCursor = hasMore ? data[data.length - 1].id : null;
+  const nextCursor = hasMore ? data[data.length - 1]?.id ?? null : null;
 
   return { data, nextCursor, hasMore };
 }

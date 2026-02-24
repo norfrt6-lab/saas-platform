@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
 import { getCSP, SECURITY_HEADERS } from "@/lib/security";
 
 const publicPaths = new Set([

@@ -81,7 +81,7 @@ class RedisRateLimitStore implements RateLimitStore {
       // Use sorted set with sliding window
       const pipeline = this.redis.pipeline();
       pipeline.zremrangebyscore(redisKey, 0, windowStart);
-      pipeline.zadd(redisKey, now, `${now}:${Math.random()}`);
+      pipeline.zadd(redisKey, now, `${now}:${crypto.randomUUID()}`);
       pipeline.zcard(redisKey);
       pipeline.pexpire(redisKey, config.windowMs);
 

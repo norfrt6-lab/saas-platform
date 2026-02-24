@@ -1,22 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  LayoutDashboard,
-  FolderKanban,
-  Users,
-  CreditCard,
-  Settings,
-  Search,
-  LogOut,
-  Plus,
-  Key,
-  Activity,
-} from "lucide-react";
+import { signOut } from "@saas/auth/client";
 import { Dialog, DialogContent } from "@saas/ui/dialog";
 import { Input } from "@saas/ui/input";
-import { signOut } from "@saas/auth";
+import {
+  Activity,
+  CreditCard,
+  FolderKanban,
+  Key,
+  LayoutDashboard,
+  LogOut,
+  Plus,
+  Search,
+  Settings,
+  Users,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 interface CommandItem {
   id: string;
@@ -119,7 +119,7 @@ export function CommandPalette() {
 
   const groups = filtered.reduce<Record<string, CommandItem[]>>((acc, cmd) => {
     if (!acc[cmd.group]) acc[cmd.group] = [];
-    acc[cmd.group].push(cmd);
+    acc[cmd.group]!.push(cmd);
     return acc;
   }, {});
 
@@ -152,7 +152,7 @@ export function CommandPalette() {
           <Input
             placeholder="Type a command or search..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
             className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
           <kbd className="pointer-events-none ml-2 inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">

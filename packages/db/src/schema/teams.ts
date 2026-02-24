@@ -28,15 +28,16 @@ export const teams = pgTable("teams", {
   slug: text("slug").notNull().unique(),
   logo: text("logo"),
   plan: planEnum("plan").default("free").notNull(),
-  billingStatus: billingStatusEnum("billing_status")
-    .default("active")
-    .notNull(),
+  billingStatus: billingStatusEnum("billing_status"),
   stripeCustomerId: text("stripe_customer_id").unique(),
   stripeSubscriptionId: text("stripe_subscription_id").unique(),
   gracePeriodEndsAt: timestamp("grace_period_ends_at"),
   trialEndsAt: timestamp("trial_ends_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => new Date()),
 });
 
 export const teamsRelations = relations(teams, ({ many }) => ({

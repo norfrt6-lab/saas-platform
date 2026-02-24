@@ -30,7 +30,10 @@ export const projects = pgTable(
     deletedBy: text("deleted_by").references(() => users.id),
     scheduledPurgeAt: timestamp("scheduled_purge_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .notNull()
+      .$onUpdateFn(() => new Date()),
   },
   (t) => [unique("projects_team_slug_unique").on(t.teamId, t.slug)],
 );

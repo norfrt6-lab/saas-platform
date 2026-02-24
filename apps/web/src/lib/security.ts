@@ -29,15 +29,23 @@ export function sanitizeHtml(input: string): string {
 
 /**
  * Content Security Policy header value.
+ *
+ * 'unsafe-inline' for styles is required by Next.js critical CSS injection.
+ * 'unsafe-eval' is only allowed in development (Next.js HMR requires it).
+ * In production, Next.js uses pre-compiled bundles — no eval needed.
  */
 export function getCSP(): string {
+  const isDev = process.env.NODE_ENV === "development";
+
   const directives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    isDev
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+      : "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self' data:",
-    "connect-src 'self' https://api.stripe.com https://checkout.stripe.com",
+    `connect-src 'self' https://api.stripe.com https://checkout.stripe.com${isDev ? " ws://localhost:3000" : ""}`,
     "frame-src https://js.stripe.com https://hooks.stripe.com",
     "object-src 'none'",
     "base-uri 'self'",

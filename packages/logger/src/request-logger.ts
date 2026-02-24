@@ -1,5 +1,9 @@
 import type { NextRequest, NextResponse } from "next/server";
-import { log } from "./index";
+import { log, generateRequestId } from "./index";
+
+const SLOW_REQUEST_THRESHOLD_MS = Number(
+  process.env.SLOW_REQUEST_THRESHOLD_MS ?? "3000",
+);
 
 export function logRequest(
   request: NextRequest,
@@ -9,7 +13,12 @@ export function logRequest(
   const duration = Date.now() - startTime;
   const { pathname, searchParams } = new URL(request.url);
 
+  // Use existing trace ID from header or generate one
+  const traceId =
+    request.headers.get("x-request-id") ?? generateRequestId();
+
   const logData = {
+    traceId,
     method: request.method,
     path: pathname,
     query: Object.fromEntries(searchParams),
@@ -25,7 +34,7 @@ export function logRequest(
     log.error(logData, "Server error");
   } else if (response.status >= 400) {
     log.warn(logData, "Client error");
-  } else if (duration > 3000) {
+  } else if (duration > SLOW_REQUEST_THRESHOLD_MS) {
     log.warn(logData, "Slow request");
   } else {
     log.info(logData, "Request completed");

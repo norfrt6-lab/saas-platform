@@ -1,7 +1,8 @@
 import crypto from "crypto";
 import { db } from "@saas/db";
 import { apiKeys } from "@saas/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, count } from "drizzle-orm";
+import { PLAN_LIMITS, type Plan } from "@saas/billing/plans";
 
 function hashKey(key: string): string {
   return crypto.createHash("sha256").update(key).digest("hex");
@@ -13,13 +14,34 @@ function generateApiKey(): string {
   return `${prefix}${random}`;
 }
 
+const MAX_API_KEYS_DEFAULT = 50;
+
 export async function createApiKey(params: {
   teamId: string;
   name: string;
   scopes: string[];
   createdBy: string;
+  teamPlan?: Plan;
   expiresAt?: Date;
 }) {
+  // Rate limit: check how many keys this team already has
+  const [keyCount] = await db
+    .select({ count: count() })
+    .from(apiKeys)
+    .where(
+      and(eq(apiKeys.teamId, params.teamId), eq(apiKeys.isActive, true)),
+    );
+
+  const maxKeys = params.teamPlan
+    ? PLAN_LIMITS[params.teamPlan].maxApiKeys
+    : MAX_API_KEYS_DEFAULT;
+
+  if (keyCount.count >= maxKeys) {
+    throw new Error(
+      `API key limit reached (${maxKeys}). Upgrade your plan for more keys.`,
+    );
+  }
+
   const plainKey = generateApiKey();
   const hashedKey = hashKey(plainKey);
 
@@ -36,12 +58,17 @@ export async function createApiKey(params: {
     })
     .returning();
 
-  // Return the plain key only once
   return {
     ...apiKey,
     key: plainKey,
   };
 }
+
+/**
+ * Debounce threshold for lastUsedAt updates.
+ * Only writes to DB if the last recorded usage is older than this.
+ */
+const LAST_USED_DEBOUNCE_MS = 5 * 60 * 1000; // 5 minutes
 
 export async function validateApiKey(key: string) {
   const hashed = hashKey(key);
@@ -64,11 +91,19 @@ export async function validateApiKey(key: string) {
     return null;
   }
 
-  // Update last used timestamp
-  await db
-    .update(apiKeys)
-    .set({ lastUsedAt: new Date() })
-    .where(eq(apiKeys.id, apiKey.id));
+  // Debounced lastUsedAt update: skip write if updated recently
+  const shouldUpdate =
+    !apiKey.lastUsedAt ||
+    Date.now() - apiKey.lastUsedAt.getTime() > LAST_USED_DEBOUNCE_MS;
+
+  if (shouldUpdate) {
+    // Fire-and-forget: don't block the request on this write
+    db.update(apiKeys)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(apiKeys.id, apiKey.id))
+      .then(() => {})
+      .catch(() => {});
+  }
 
   return apiKey;
 }

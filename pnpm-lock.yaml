@@ -75,6 +75,9 @@ importers:
       '@playwright/test':
         specifier: ^1.49.0
         version: 1.58.2
+      '@saas/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@types/node':
         specifier: ^22.10.0
         version: 22.19.11
@@ -84,6 +87,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.0
         version: 19.2.3(@types/react@19.2.14)
+      eslint:
+        specifier: ^9.16.0
+        version: 9.39.3
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -251,9 +257,21 @@ importers:
       eslint-config-next:
         specifier: ^15.1.0
         version: 15.5.12(eslint@9.39.3)(typescript@5.9.3)
+      eslint-config-prettier:
+        specifier: ^9.1.0
+        version: 9.1.2(eslint@9.39.3)
       eslint-plugin-import:
         specifier: ^2.31.0
         version: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.3)
+      eslint-plugin-jsx-a11y:
+        specifier: ^6.10.0
+        version: 6.10.2(eslint@9.39.3)
+      eslint-plugin-react:
+        specifier: ^7.37.0
+        version: 7.37.5(eslint@9.39.3)
+      eslint-plugin-react-hooks:
+        specifier: ^5.1.0
+        version: 5.2.0(eslint@9.39.3)
 
   tooling/tailwind:
     devDependencies:
@@ -2643,6 +2661,12 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  eslint-config-prettier@9.1.2:
+    resolution: {integrity: sha512-iI1f+D2ViGn+uvv5HuHVUamg8ll4tN+JRHGc6IJi4TP9Kl976C57fzPXgseXNs8v0iA8aSJpHsTWjDb9QJamGQ==}
+    hasBin: true
+    peerDependencies:
+      eslint: '>=7.0.0'
 
   eslint-import-resolver-node@0.3.9:
     resolution: {integrity: sha512-WFj2isz22JahUv+B788TlO3N6zL3nNJGU8CcZbPZvVEkBPaJdCV4vy5wyghty5ROFbCRnm132v8BScu5/1BQ8g==}
@@ -5868,6 +5892,10 @@ snapshots:
       - eslint-import-resolver-webpack
       - eslint-plugin-import-x
       - supports-color
+
+  eslint-config-prettier@9.1.2(eslint@9.39.3):
+    dependencies:
+      eslint: 9.39.3
 
   eslint-import-resolver-node@0.3.9:
     dependencies:

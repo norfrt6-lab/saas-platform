@@ -37,9 +37,11 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",
+    "@saas/eslint-config": "workspace:*",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "eslint": "^9.16.0",
     "typescript": "^5.7.2",
     "vitest": "^2.1.0"
   }

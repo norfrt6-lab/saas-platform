@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@saas/db";
+import * as schema from "@saas/db/schema";
 
 type Auth = ReturnType<typeof betterAuth>;
 
@@ -14,6 +15,7 @@ function getAuth(): Auth {
     baseURL: process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL,
     database: drizzleAdapter(db, {
       provider: "pg",
+      schema,
     }),
     emailAndPassword: {
       enabled: true,
@@ -22,20 +24,22 @@ function getAuth(): Auth {
       autoSignIn: true,
     },
     socialProviders: {
-      google: {
-        clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-        enabled: !!(
-          process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-        ),
-      },
-      github: {
-        clientId: process.env.GITHUB_CLIENT_ID ?? "",
-        clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
-        enabled: !!(
-          process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
-        ),
-      },
+      ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+        ? {
+            google: {
+              clientId: process.env.GOOGLE_CLIENT_ID,
+              clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            },
+          }
+        : {}),
+      ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+        ? {
+            github: {
+              clientId: process.env.GITHUB_CLIENT_ID,
+              clientSecret: process.env.GITHUB_CLIENT_SECRET,
+            },
+          }
+        : {}),
     },
     session: {
       expiresIn: 60 * 60 * 24 * 7, // 7 days

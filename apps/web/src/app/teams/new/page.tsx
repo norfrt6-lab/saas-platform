@@ -84,7 +84,6 @@ export default function CreateTeamPage() {
                 required
                 minLength={2}
                 maxLength={50}
-                autoFocus
               />
               <p className="text-xs text-muted-foreground">
                 2-50 characters. You can change this later.

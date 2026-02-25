@@ -70,8 +70,22 @@ export function withErrorHandler(
       );
     }
 
+    // Capture unexpected errors for error tracking (Sentry, etc.)
+    if (typeof globalThis.__captureException === "function") {
+      globalThis.__captureException(error);
+    }
+
     const message =
       error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });
   });
+}
+
+/**
+ * Global hook for error tracking integration.
+ * Set `globalThis.__captureException` to wire in Sentry or other providers.
+ */
+declare global {
+  // eslint-disable-next-line no-var
+  var __captureException: ((error: unknown) => void) | undefined;
 }

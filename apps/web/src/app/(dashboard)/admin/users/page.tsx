@@ -1,5 +1,5 @@
 import { db } from "@saas/db";
-import { users, type User } from "@saas/db/schema";
+import { user } from "@saas/db/schema";
 import { Badge } from "@saas/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@saas/ui/card";
 import { desc } from "drizzle-orm";
@@ -17,8 +17,8 @@ export default async function AdminUsersPage() {
 
   const allUsers = await db
     .select()
-    .from(users)
-    .orderBy(desc(users.createdAt))
+    .from(user)
+    .orderBy(desc(user.createdAt))
     .limit(100);
 
   return (
@@ -46,21 +46,17 @@ export default async function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {allUsers.map((user: User) => (
-                  <tr key={user.id} className="border-b">
-                    <td className="px-4 py-3 text-sm font-medium">{user.name}</td>
+                {allUsers.map((u) => (
+                  <tr key={u.id} className="border-b">
+                    <td className="px-4 py-3 text-sm font-medium">{u.name}</td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {user.email}
+                      {u.email}
                     </td>
                     <td className="px-4 py-3">
-                      <Badge
-                        variant={user.role === "admin" ? "default" : "secondary"}
-                      >
-                        {user.role}
-                      </Badge>
+                      <Badge variant="secondary">user</Badge>
                     </td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {formatDate(user.createdAt)}
+                      {formatDate(u.createdAt)}
                     </td>
                   </tr>
                 ))}

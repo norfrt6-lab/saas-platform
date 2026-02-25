@@ -1,6 +1,6 @@
 import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
-import { users } from "./users";
+import { user } from "./auth";
 import { teams } from "./teams";
 
 export const apiKeys = pgTable("api_keys", {
@@ -15,7 +15,7 @@ export const apiKeys = pgTable("api_keys", {
     .references(() => teams.id, { onDelete: "cascade" }),
   createdBy: text("created_by")
     .notNull()
-    .references(() => users.id),
+    .references(() => user.id),
   scopes: text("scopes").array(),
   isActive: boolean("is_active").default(true).notNull(),
   lastUsedAt: timestamp("last_used_at"),

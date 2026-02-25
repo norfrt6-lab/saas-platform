@@ -7,7 +7,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
-import { users } from "./users";
+import { user } from "./auth";
 import { projects } from "./projects";
 
 export const planEnum = pgEnum("plan", ["free", "pro", "enterprise"]);
@@ -53,7 +53,7 @@ export const teamMembers = pgTable(
       .$defaultFn(() => createId()),
     userId: text("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade" }),
     teamId: text("team_id")
       .notNull()
       .references(() => teams.id, { onDelete: "cascade" }),
@@ -64,7 +64,7 @@ export const teamMembers = pgTable(
 );
 
 export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
-  user: one(users, { fields: [teamMembers.userId], references: [users.id] }),
+  user: one(user, { fields: [teamMembers.userId], references: [user.id] }),
   team: one(teams, { fields: [teamMembers.teamId], references: [teams.id] }),
 }));
 

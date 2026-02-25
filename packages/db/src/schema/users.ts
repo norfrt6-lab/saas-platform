@@ -5,9 +5,7 @@ import {
   boolean,
   pgEnum,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
-import { teamMembers } from "./teams";
 
 export const roleEnum = pgEnum("role", ["user", "admin"]);
 
@@ -27,10 +25,6 @@ export const users = pgTable("users", {
     .notNull()
     .$onUpdateFn(() => new Date()),
 });
-
-export const usersRelations = relations(users, ({ many }) => ({
-  memberships: many(teamMembers),
-}));
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

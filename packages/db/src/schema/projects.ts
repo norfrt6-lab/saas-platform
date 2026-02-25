@@ -7,7 +7,7 @@ import {
 import { relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { teams } from "./teams";
-import { users } from "./users";
+import { user } from "./auth";
 
 export const projects = pgTable(
   "projects",
@@ -27,7 +27,7 @@ export const projects = pgTable(
       .default("active")
       .notNull(),
     deletedAt: timestamp("deleted_at"),
-    deletedBy: text("deleted_by").references(() => users.id),
+    deletedBy: text("deleted_by").references(() => user.id),
     scheduledPurgeAt: timestamp("scheduled_purge_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")

@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { TeamSwitcher } from "./team-switcher";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -26,8 +29,33 @@ const navigation = [
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
+interface Team {
+  id: string;
+  name: string;
+  slug: string;
+  plan: string;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [activeTeamId, setActiveTeamId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/teams")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: { team: Team; role: string }[] | Team[]) => {
+        // API returns { team, role }[] from getUserTeams
+        const teamList = data.map((item: { team: Team; role: string } | Team) =>
+          "team" in item ? item.team : item
+        );
+        setTeams(teamList);
+        if (teamList.length > 0) {
+          setActiveTeamId(teamList[0].id);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <aside className="flex h-full w-64 flex-col border-r bg-card">
@@ -38,6 +66,9 @@ export function Sidebar() {
           </div>
           <span className="text-lg font-semibold">SaaS Platform</span>
         </Link>
+      </div>
+      <div className="p-3 pb-0">
+        <TeamSwitcher teams={teams} activeTeamId={activeTeamId} />
       </div>
       <nav className="flex-1 space-y-1 p-3">
         {navigation.map((item) => {

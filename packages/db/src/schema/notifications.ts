@@ -8,7 +8,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
-import { users } from "./users";
+import { user } from "./auth";
 
 export const notificationTypeEnum = pgEnum("notification_type", [
   "team.invite",
@@ -28,7 +28,7 @@ export const notifications = pgTable(
       .$defaultFn(() => createId()),
     userId: text("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade" }),
     type: notificationTypeEnum("type").notNull(),
     title: text("title").notNull(),
     body: text("body"),

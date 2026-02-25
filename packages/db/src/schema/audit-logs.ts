@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
-import { users } from "./users";
+import { user } from "./auth";
 import { teams } from "./teams";
 
 export const auditLogs = pgTable("audit_logs", {
@@ -8,7 +8,7 @@ export const auditLogs = pgTable("audit_logs", {
     .primaryKey()
     .$defaultFn(() => createId()),
   action: text("action").notNull(),
-  userId: text("user_id").references(() => users.id),
+  userId: text("user_id").references(() => user.id),
   teamId: text("team_id").references(() => teams.id),
   targetType: text("target_type"),
   targetId: text("target_id"),

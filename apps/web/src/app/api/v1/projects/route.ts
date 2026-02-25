@@ -1,8 +1,9 @@
 import type { NextRequest } from "next/server";
 
 import { authenticateApiRequest, requireScope } from "@/lib/api/api-middleware";
+import { cachedJsonResponse } from "@/lib/api/cache-headers";
 import { createProject, listProjects } from "@/lib/api/projects";
-import { apiSuccess, apiList, apiError, ErrorCodes } from "@/lib/api/response";
+import { apiSuccess, apiError, ErrorCodes } from "@/lib/api/response";
 
 export async function GET(request: NextRequest) {
   const auth = await authenticateApiRequest(request);
@@ -21,9 +22,16 @@ export async function GET(request: NextRequest) {
     limit,
   });
 
-  return apiList(result.data, {
-    hasMore: result.hasMore,
-    nextCursor: result.nextCursor ?? null,
+  return cachedJsonResponse(request, {
+    data: result.data,
+    pagination: {
+      hasMore: result.hasMore,
+      nextCursor: result.nextCursor ?? null,
+    },
+  }, {
+    maxAge: 5,
+    staleWhileRevalidate: 30,
+    isPrivate: true,
   });
 }
 

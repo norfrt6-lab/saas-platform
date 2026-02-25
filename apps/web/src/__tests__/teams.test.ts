@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createTeam as createTeamFixture, createTeamMember } from "./helpers/fixtures";
 
 function chainable(resolvedValue: unknown = []) {
   const chain: Record<string, unknown> = {};
@@ -52,6 +51,7 @@ vi.mock("@/lib/utils", () => ({
   slugify: vi.fn((text: string) => text.toLowerCase().replace(/\s+/g, "-")),
 }));
 
+import { ForbiddenError, BadRequestError } from "../lib/api/errors";
 import {
   verifyTeamMembership,
   requireTeamRole,
@@ -63,7 +63,7 @@ import {
   updateMemberRole,
   removeMember,
 } from "../lib/api/teams";
-import { ForbiddenError, BadRequestError } from "../lib/api/errors";
+import { createTeam as createTeamFixture, createTeamMember } from "./helpers/fixtures";
 
 describe("Teams Service", () => {
   beforeEach(() => {

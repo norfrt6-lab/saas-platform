@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createProject as createProjectFixture } from "./helpers/fixtures";
 
 function chainable(resolvedValue: unknown = []) {
   const chain: Record<string, unknown> = {};
@@ -54,6 +53,7 @@ import {
   restoreProject,
   hardDeleteProject,
 } from "../lib/api/projects";
+import { createProject as createProjectFixture } from "./helpers/fixtures";
 
 describe("Projects Service", () => {
   beforeEach(() => {

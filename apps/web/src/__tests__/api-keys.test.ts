@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createApiKey as createApiKeyFixture } from "./helpers/fixtures";
 
 function chainable(resolvedValue: unknown = []) {
   const chain: Record<string, unknown> = {};
@@ -65,6 +64,7 @@ vi.mock("@saas/logger", () => ({
   })),
 }));
 
+import { BadRequestError } from "../lib/api/errors";
 import {
   createApiKey,
   validateApiKey,
@@ -72,7 +72,7 @@ import {
   revokeApiKey,
   deleteApiKey,
 } from "../lib/api/api-keys";
-import { BadRequestError } from "../lib/api/errors";
+import { createApiKey as createApiKeyFixture } from "./helpers/fixtures";
 
 describe("API Keys Service", () => {
   beforeEach(() => {

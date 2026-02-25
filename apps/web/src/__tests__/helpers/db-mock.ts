@@ -17,19 +17,6 @@ export function createDbMock() {
   const chain: Record<string, ReturnType<typeof vi.fn>> = {};
 
   const terminalMethods = ["limit", "returning", "execute"];
-  const chainingMethods = [
-    "select",
-    "from",
-    "where",
-    "set",
-    "values",
-    "insert",
-    "update",
-    "delete",
-    "orderBy",
-    "innerJoin",
-    "leftJoin",
-  ];
 
   const proxy = new Proxy(chain, {
     get(_target, prop: string) {

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createInvitation as createInvitationFixture, createTeamMember } from "./helpers/fixtures";
 
 function chainable(resolvedValue: unknown = []) {
   const chain: Record<string, unknown> = {};
@@ -48,13 +47,14 @@ vi.mock("drizzle-orm", () => ({
   and: vi.fn((...args: unknown[]) => ({ type: "and", args })),
 }));
 
+import { ConflictError, NotFoundError, ForbiddenError } from "../lib/api/errors";
 import {
   createInvitation,
   acceptInvitation,
   getTeamInvitations,
   revokeInvitation,
 } from "../lib/api/invitations";
-import { ConflictError, NotFoundError, BadRequestError, ForbiddenError } from "../lib/api/errors";
+import { createInvitation as createInvitationFixture, createTeamMember } from "./helpers/fixtures";
 
 describe("Invitations Service", () => {
   beforeEach(() => {

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createAuditLog as createAuditLogFixture } from "./helpers/fixtures";
 
 function chainable(resolvedValue: unknown = []) {
   const chain: Record<string, unknown> = {};
@@ -38,6 +37,7 @@ vi.mock("drizzle-orm", () => ({
 }));
 
 import { createAuditLog, getAuditLogs } from "../lib/api/audit";
+import { createAuditLog as createAuditLogFixture } from "./helpers/fixtures";
 
 describe("Audit Service", () => {
   beforeEach(() => {

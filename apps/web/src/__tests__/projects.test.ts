@@ -85,7 +85,7 @@ describe("Projects Service", () => {
         teamId: "team1",
       });
 
-      expect(result.description).toBe("A test project");
+      expect(result!.description).toBe("A test project");
     });
   });
 

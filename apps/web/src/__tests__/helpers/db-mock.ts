@@ -11,7 +11,26 @@ import { vi } from "vitest";
  *   const result = await mock.select().from(table).where(cond);
  *   // result === [{ id: "1", name: "Team" }]
  */
-export function createDbMock() {
+export type MockDb = {
+  _resolveWith: (value: unknown) => void;
+  _reset: () => void;
+  select: ReturnType<typeof vi.fn>;
+  insert: ReturnType<typeof vi.fn>;
+  update: ReturnType<typeof vi.fn>;
+  delete: ReturnType<typeof vi.fn>;
+  from: ReturnType<typeof vi.fn>;
+  where: ReturnType<typeof vi.fn>;
+  set: ReturnType<typeof vi.fn>;
+  values: ReturnType<typeof vi.fn>;
+  returning: ReturnType<typeof vi.fn>;
+  limit: ReturnType<typeof vi.fn>;
+  orderBy: ReturnType<typeof vi.fn>;
+  innerJoin: ReturnType<typeof vi.fn>;
+  transaction: ReturnType<typeof vi.fn>;
+  execute: ReturnType<typeof vi.fn>;
+};
+
+export function createDbMock(): MockDb {
   let resolvedValue: unknown = [];
 
   const chain: Record<string, ReturnType<typeof vi.fn>> = {};
@@ -51,24 +70,5 @@ export function createDbMock() {
     },
   });
 
-  return proxy as unknown as ReturnType<typeof createDbMock>;
+  return proxy as unknown as MockDb;
 }
-
-export type MockDb = ReturnType<typeof createDbMock> & {
-  _resolveWith: (value: unknown) => void;
-  _reset: () => void;
-  select: ReturnType<typeof vi.fn>;
-  insert: ReturnType<typeof vi.fn>;
-  update: ReturnType<typeof vi.fn>;
-  delete: ReturnType<typeof vi.fn>;
-  from: ReturnType<typeof vi.fn>;
-  where: ReturnType<typeof vi.fn>;
-  set: ReturnType<typeof vi.fn>;
-  values: ReturnType<typeof vi.fn>;
-  returning: ReturnType<typeof vi.fn>;
-  limit: ReturnType<typeof vi.fn>;
-  orderBy: ReturnType<typeof vi.fn>;
-  innerJoin: ReturnType<typeof vi.fn>;
-  transaction: ReturnType<typeof vi.fn>;
-  execute: ReturnType<typeof vi.fn>;
-};

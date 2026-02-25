@@ -208,7 +208,7 @@ describe("Teams Service", () => {
 
       const result = await getTeamMembers("team1");
       expect(result).toHaveLength(1);
-      expect(result[0].userName).toBe("Alice");
+      expect(result[0]!.userName).toBe("Alice");
     });
   });
 

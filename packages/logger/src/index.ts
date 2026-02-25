@@ -60,3 +60,30 @@ export function createRequestLogger(requestId?: string) {
 }
 
 export type Logger = typeof log;
+
+/**
+ * Standard log fields for structured log aggregation.
+ * Use these when logging to ensure consistent field names across services.
+ */
+export const LogFields = {
+  CORRELATION_ID: "correlationId",
+  TEAM_ID: "teamId",
+  USER_ID: "userId",
+  METHOD: "method",
+  PATH: "path",
+  STATUS_CODE: "statusCode",
+  DURATION_MS: "durationMs",
+  ERROR_CODE: "errorCode",
+} as const;
+
+/**
+ * Create a structured log entry with consistent field naming.
+ * Useful for log aggregation tools (Datadog, ELK, Loki, etc.)
+ */
+export function structuredLog(
+  level: "info" | "warn" | "error" | "debug",
+  message: string,
+  fields: Record<string, unknown>,
+): void {
+  log[level](fields, message);
+}

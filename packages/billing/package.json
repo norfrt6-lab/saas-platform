@@ -7,18 +7,22 @@
   "exports": {
     ".": "./src/index.ts",
     "./plans": "./src/plans.ts",
-    "./feature-gate": "./src/feature-gate.ts"
+    "./feature-gate": "./src/feature-gate.ts",
+    "./cache": "./src/cache.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "clean": "rm -rf dist .turbo node_modules"
   },
   "dependencies": {
     "@saas/db": "workspace:*",
+    "@saas/logger": "workspace:*",
     "drizzle-orm": "^0.38.0",
     "stripe": "^17.5.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.0"
   }
 }

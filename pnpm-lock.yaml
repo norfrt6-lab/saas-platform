@@ -193,12 +193,18 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@types/node@22.19.11)
 
   packages/billing:
     dependencies:
       '@saas/db':
         specifier: workspace:*
         version: link:../db
+      '@saas/logger':
+        specifier: workspace:*
+        version: link:../logger
       drizzle-orm:
         specifier: ^0.38.0
         version: 0.38.4(@types/react@19.2.14)(kysely@0.28.11)(postgres@3.4.8)(react@19.2.4)
@@ -209,6 +215,9 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@types/node@22.19.11)
 
   packages/db:
     dependencies:

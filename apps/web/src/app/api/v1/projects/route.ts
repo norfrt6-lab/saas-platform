@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { authenticateApiRequest, requireScope } from "@/lib/api/api-middleware";
+import { cachedJsonResponse } from "@/lib/api/cache-headers";
 import { createProject, listProjects } from "@/lib/api/projects";
+import { apiSuccess, apiError, ErrorCodes } from "@/lib/api/response";
 
 export async function GET(request: NextRequest) {
   const auth = await authenticateApiRequest(request);
@@ -21,12 +22,16 @@ export async function GET(request: NextRequest) {
     limit,
   });
 
-  return NextResponse.json({
+  return cachedJsonResponse(request, {
     data: result.data,
     pagination: {
       hasMore: result.hasMore,
-      nextCursor: result.nextCursor,
+      nextCursor: result.nextCursor ?? null,
     },
+  }, {
+    maxAge: 5,
+    staleWhileRevalidate: 30,
+    isPrivate: true,
   });
 }
 
@@ -40,10 +45,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
 
   if (!body?.name || typeof body.name !== "string") {
-    return NextResponse.json(
-      { error: "validation_error", message: "name is required" },
-      { status: 400 },
-    );
+    return apiError(ErrorCodes.VALIDATION_ERROR, "name is required", 400);
   }
 
   const project = await createProject({
@@ -52,5 +54,5 @@ export async function POST(request: NextRequest) {
     teamId: auth.context.teamId,
   });
 
-  return NextResponse.json({ data: project }, { status: 201 });
+  return apiSuccess(project, 201);
 }

@@ -1,3 +1,4 @@
 {
-  "extends": ["@saas/eslint-config/next"]
+  "extends": ["@saas/eslint-config/next"],
+  "ignorePatterns": ["src/__tests__/**"]
 }

@@ -12,6 +12,8 @@ export const env = createEnv({
     MEILISEARCH_HOST: z.string().url().default("http://localhost:7700"),
     MEILISEARCH_API_KEY: z.string().min(1).default("dev_master_key"),
     CRON_SECRET: z.string().min(16).optional(),
+    SENTRY_DSN: z.string().url().optional(),
+    METRICS_SECRET: z.string().min(16).optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -31,6 +33,8 @@ export const env = createEnv({
     MEILISEARCH_HOST: process.env.MEILISEARCH_HOST,
     MEILISEARCH_API_KEY: process.env.MEILISEARCH_API_KEY,
     CRON_SECRET: process.env.CRON_SECRET,
+    SENTRY_DSN: process.env.SENTRY_DSN,
+    METRICS_SECRET: process.env.METRICS_SECRET,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:

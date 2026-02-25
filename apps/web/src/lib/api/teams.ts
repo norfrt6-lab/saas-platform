@@ -1,5 +1,5 @@
 import { db, type Database } from "@saas/db";
-import { teamMembers, teams, users, type Team, type TeamMember } from "@saas/db/schema";
+import { teamMembers, teams, user, type Team, type TeamMember } from "@saas/db/schema";
 import { and, eq } from "drizzle-orm";
 
 import { slugify } from "@/lib/utils";
@@ -134,12 +134,12 @@ export async function getTeamMembers(teamId: string): Promise<TeamMemberWithUser
       teamId: teamMembers.teamId,
       role: teamMembers.role,
       joinedAt: teamMembers.joinedAt,
-      userName: users.name,
-      userEmail: users.email,
-      userImage: users.image,
+      userName: user.name,
+      userEmail: user.email,
+      userImage: user.image,
     })
     .from(teamMembers)
-    .innerJoin(users, eq(teamMembers.userId, users.id))
+    .innerJoin(user, eq(teamMembers.userId, user.id))
     .where(eq(teamMembers.teamId, teamId))
     .orderBy(teamMembers.joinedAt);
 

@@ -1,5 +1,5 @@
 import { db } from "@saas/db";
-import { projects, teams, users } from "@saas/db/schema";
+import { projects, teams, user } from "@saas/db/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas/ui/card";
 import { count } from "drizzle-orm";
 import { Building2, FolderKanban, Users } from "lucide-react";
@@ -16,7 +16,7 @@ export default async function AdminPage() {
   await requireAdmin();
 
   const [userResult, teamResult, projectResult] = await Promise.all([
-    db.select({ count: count() }).from(users) as Promise<{ count: number }[]>,
+    db.select({ count: count() }).from(user) as Promise<{ count: number }[]>,
     db.select({ count: count() }).from(teams) as Promise<{ count: number }[]>,
     db.select({ count: count() }).from(projects) as Promise<{ count: number }[]>,
   ]);

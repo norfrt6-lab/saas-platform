@@ -32,8 +32,12 @@ export function RegisterForm() {
     }
 
     try {
-      await signUp.email({ name, email, password });
-      router.push("/dashboard");
+      const result = await signUp.email({ name, email, password });
+      if (result.error) {
+        setError(result.error.message ?? "Failed to create account. Please try again.");
+      } else {
+        router.push("/dashboard");
+      }
     } catch {
       setError("Failed to create account. Please try again.");
     } finally {

@@ -32,7 +32,7 @@ export const log = pino({
     censor: "[REDACTED]",
   },
   transport:
-    process.env.NODE_ENV === "development"
+    process.env.NODE_ENV === "development" && !process.env.NEXT_RUNTIME
       ? { target: "pino-pretty", options: { colorize: true } }
       : undefined,
 });

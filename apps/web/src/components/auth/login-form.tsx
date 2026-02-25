@@ -25,8 +25,12 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      await signIn.email({ email, password });
-      router.push("/dashboard");
+      const result = await signIn.email({ email, password });
+      if (result.error) {
+        setError(result.error.message ?? "Invalid email or password");
+      } else {
+        router.push("/dashboard");
+      }
     } catch {
       setError("Invalid email or password");
     } finally {

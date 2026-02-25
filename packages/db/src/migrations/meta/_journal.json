@@ -15,6 +15,13 @@
       "when": 1771966900000,
       "tag": "0001_better_auth_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772006400000,
+      "tag": "0002_fk_user_to_auth_user",
+      "breakpoints": true
     }
   ]
 }

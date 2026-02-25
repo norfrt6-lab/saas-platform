@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, pgEnum, index } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
-import { users } from "./users";
+import { user } from "./auth";
 import { teams, teamRoleEnum } from "./teams";
 
 export const invitationStatusEnum = pgEnum("invitation_status", [
@@ -22,7 +22,7 @@ export const invitations = pgTable(
     role: teamRoleEnum("role").default("member").notNull(),
     invitedBy: text("invited_by")
       .notNull()
-      .references(() => users.id),
+      .references(() => user.id),
     token: text("token").notNull().unique(),
     status: invitationStatusEnum("status").default("pending").notNull(),
     expiresAt: timestamp("expires_at").notNull(),

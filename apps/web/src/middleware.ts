@@ -48,8 +48,8 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = !!sessionToken;
   const isPublic = isPublicPath(pathname);
 
-  // Redirect authenticated users away from auth pages
-  if (isAuthenticated && pathname.startsWith("/auth/")) {
+  // Redirect authenticated users away from auth pages and landing page
+  if (isAuthenticated && (pathname === "/" || pathname.startsWith("/auth/"))) {
     const response = NextResponse.redirect(new URL("/dashboard", request.url));
     return applySecurityHeaders(response);
   }

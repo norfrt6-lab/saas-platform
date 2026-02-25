@@ -11,6 +11,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "clean": "rm -rf dist .turbo node_modules"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "stripe": "^17.5.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.0"
   }
 }

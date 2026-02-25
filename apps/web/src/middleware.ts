@@ -1,7 +1,10 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { getCSP, SECURITY_HEADERS } from "@/lib/security";
+
+const CORRELATION_ID_HEADER = "x-correlation-id";
 
 const publicPaths = new Set([
   "/",
@@ -41,6 +44,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Propagate or generate correlation ID for request tracing
+  const correlationId =
+    request.headers.get(CORRELATION_ID_HEADER) ?? crypto.randomUUID();
+
   const sessionToken =
     request.cookies.get("better-auth.session_token")?.value ??
     request.cookies.get("__Secure-better-auth.session_token")?.value;
@@ -51,6 +58,7 @@ export function middleware(request: NextRequest) {
   // Redirect authenticated users away from auth pages and landing page
   if (isAuthenticated && (pathname === "/" || pathname.startsWith("/auth/"))) {
     const response = NextResponse.redirect(new URL("/dashboard", request.url));
+    response.headers.set(CORRELATION_ID_HEADER, correlationId);
     return applySecurityHeaders(response);
   }
 
@@ -59,10 +67,16 @@ export function middleware(request: NextRequest) {
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     const response = NextResponse.redirect(loginUrl);
+    response.headers.set(CORRELATION_ID_HEADER, correlationId);
     return applySecurityHeaders(response);
   }
 
   const response = NextResponse.next();
+  // Forward correlation ID to downstream handlers via request header
+  response.headers.set(CORRELATION_ID_HEADER, correlationId);
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(CORRELATION_ID_HEADER, correlationId);
+
   return applySecurityHeaders(response);
 }
 

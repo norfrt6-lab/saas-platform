@@ -12,7 +12,8 @@ import {
 describe("utils", () => {
   describe("formatDate", () => {
     it("should format a date string", () => {
-      const result = formatDate("2024-01-15");
+      // Use explicit UTC date to avoid timezone shifts
+      const result = formatDate(new Date(2024, 0, 15));
       expect(result).toContain("Jan");
       expect(result).toContain("15");
       expect(result).toContain("2024");

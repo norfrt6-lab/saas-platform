@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -46,7 +45,7 @@ export function middleware(request: NextRequest) {
 
   // Propagate or generate correlation ID for request tracing
   const correlationId =
-    request.headers.get(CORRELATION_ID_HEADER) ?? crypto.randomUUID();
+    request.headers.get(CORRELATION_ID_HEADER) ?? globalThis.crypto.randomUUID();
 
   const sessionToken =
     request.cookies.get("better-auth.session_token")?.value ??

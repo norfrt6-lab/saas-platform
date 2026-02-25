@@ -8,9 +8,10 @@ vi.mock("@saas/auth/rate-limit", () => ({
   checkRateLimit: vi.fn(),
 }));
 
-import { authenticateApiRequest, requireScope, type ApiContext } from "../lib/api/api-middleware";
-import { validateApiKey } from "../lib/api/api-keys";
 import { checkRateLimit } from "@saas/auth/rate-limit";
+
+import { validateApiKey } from "../lib/api/api-keys";
+import { authenticateApiRequest, requireScope, type ApiContext } from "../lib/api/api-middleware";
 
 const mockValidateApiKey = vi.mocked(validateApiKey);
 const mockCheckRateLimit = vi.mocked(checkRateLimit);

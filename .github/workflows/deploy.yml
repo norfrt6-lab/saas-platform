@@ -60,9 +60,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run database migrations (staging)
-        run: pnpm db:migrate
         env:
           DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "STAGING_DATABASE_URL not set, skipping migrations"
+            exit 0
+          fi
+          pnpm db:migrate
 
       - name: Staging health check
         id: staging-health
@@ -123,9 +128,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run database migrations (production)
-        run: pnpm db:migrate
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "PRODUCTION_DATABASE_URL not set, skipping migrations"
+            exit 0
+          fi
+          pnpm db:migrate
 
       - name: Production health check
         id: health-check

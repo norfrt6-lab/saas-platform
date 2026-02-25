@@ -50,8 +50,9 @@ export function Sidebar() {
           "team" in item ? item.team : item
         );
         setTeams(teamList);
-        if (teamList.length > 0) {
-          setActiveTeamId(teamList[0].id);
+        const first = teamList[0];
+        if (first) {
+          setActiveTeamId(first.id);
         }
       })
       .catch(() => {});

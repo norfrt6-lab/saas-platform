@@ -32,6 +32,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 }
 
 export function middleware(request: NextRequest) {
+  const startTime = Date.now();
   const { pathname } = request.nextUrl;
 
   // Skip static files and Next.js internals
@@ -75,6 +76,10 @@ export function middleware(request: NextRequest) {
   response.headers.set(CORRELATION_ID_HEADER, correlationId);
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(CORRELATION_ID_HEADER, correlationId);
+
+  // Server-Timing header for response time visibility in browser DevTools
+  const durationMs = Date.now() - startTime;
+  response.headers.set("Server-Timing", `middleware;dur=${durationMs}`);
 
   return applySecurityHeaders(response);
 }

@@ -1,0 +1,21 @@
+# Default owner for everything
+* @norfrt6-lab
+
+# Package ownership
+packages/auth/       @norfrt6-lab
+packages/billing/    @norfrt6-lab
+packages/db/         @norfrt6-lab
+packages/email/      @norfrt6-lab
+packages/jobs/       @norfrt6-lab
+packages/logger/     @norfrt6-lab
+packages/ui/         @norfrt6-lab
+packages/validators/ @norfrt6-lab
+
+# Application
+apps/web/            @norfrt6-lab
+
+# CI/CD and DevOps
+.github/             @norfrt6-lab
+
+# Documentation
+docs/                @norfrt6-lab

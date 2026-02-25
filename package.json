@@ -16,9 +16,12 @@
     "db:migrate": "turbo db:migrate",
     "db:seed": "turbo db:seed",
     "db:studio": "turbo db:studio",
-    "clean": "turbo clean && rm -rf node_modules"
+    "clean": "turbo clean && rm -rf node_modules",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.0",
+    "lint-staged": "^15.2.0",
     "prettier": "^3.4.2",
     "turbo": "^2.4.0"
   },

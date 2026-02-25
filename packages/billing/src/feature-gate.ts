@@ -1,5 +1,6 @@
 import { db, teams, projects, teamMembers, usageRecords } from "@saas/db";
 import { eq, and, isNull, count, sum } from "drizzle-orm";
+import { cacheThrough, billingCache } from "./cache";
 import { PLAN_LIMITS, hasFeature, type Plan } from "./plans";
 
 export interface UsageCheck {
@@ -10,17 +11,27 @@ export interface UsageCheck {
 }
 
 /**
- * Fetch team plan once and reuse across multiple limit checks.
+ * Fetch team plan with caching (60s TTL).
+ * Reduces repeated DB lookups when multiple limit checks run for the same team.
  */
 async function getTeamPlan(teamId: string): Promise<Plan> {
-  const [team] = await db
-    .select({ plan: teams.plan })
-    .from(teams)
-    .where(eq(teams.id, teamId))
-    .limit(1);
+  return cacheThrough(`plan:${teamId}`, async () => {
+    const [team] = await db
+      .select({ plan: teams.plan })
+      .from(teams)
+      .where(eq(teams.id, teamId))
+      .limit(1);
 
-  if (!team) throw new Error("Team not found");
-  return team.plan;
+    if (!team) throw new Error("Team not found");
+    return team.plan;
+  });
+}
+
+/**
+ * Invalidate the cached plan for a team (call after plan changes).
+ */
+export function invalidateTeamPlanCache(teamId: string): void {
+  billingCache.invalidate(`plan:${teamId}`);
 }
 
 export async function checkProjectLimit(teamId: string): Promise<UsageCheck> {

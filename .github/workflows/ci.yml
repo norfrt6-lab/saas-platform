@@ -37,12 +37,26 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo test
+
+      - name: Run tests with coverage
+        run: pnpm turbo test -- --coverage
+        env:
+          SKIP_ENV_VALIDATION: "1"
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: apps/web/coverage/
+          retention-days: 14
 
   build:
     name: Build
     runs-on: ubuntu-latest
     needs: lint
+    env:
+      SKIP_ENV_VALIDATION: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -81,13 +95,14 @@ jobs:
           AUDIT_OUTPUT=$(pnpm audit --json 2>/dev/null || echo '{}')
           CRITICAL=$(echo "$AUDIT_OUTPUT" | jq '.metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
           if [ "$CRITICAL" -gt 0 ] 2>/dev/null; then
-            echo "::warning::Found $CRITICAL critical vulnerabilities"
+            echo "::error::Found $CRITICAL critical vulnerabilities"
+            exit 1
           fi
 
       # License compliance check
       - name: Check licenses
         run: |
-          npx license-checker --production --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;0BSD;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0" --excludePrivatePackages 2>/dev/null || echo "License check completed with warnings"
+          npx license-checker --production --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;0BSD;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0" --excludePrivatePackages
 
       # CodeQL-style static analysis via ESLint security rules
       - name: Security linting

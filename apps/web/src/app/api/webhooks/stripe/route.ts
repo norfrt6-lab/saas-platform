@@ -1,184 +1,84 @@
-import { stripe } from "@saas/billing";
-import { db } from "@saas/db";
-import { processedWebhooks, teams, type ProcessedWebhook, type Team } from "@saas/db/schema";
-import { createChildLogger } from "@saas/logger";
-import { eq } from "drizzle-orm";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import type Stripe from "stripe";
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { stripe } from "@/lib/billing/stripe";
 
-const log = createChildLogger({ module: "stripe-webhook" });
+// Idempotency: track processed event IDs (use Redis/DB in production)
+const processedEvents = new Set<string>();
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+async function handleSubscriptionUpdated(
+  subscription: Stripe.Subscription,
+): Promise<void> {
+  const { tenantId } = subscription.metadata;
+  const plan = (subscription.metadata.plan ?? "free") as "free" | "pro" | "enterprise";
+  const status = subscription.status;
 
-const VALID_PLANS = new Set(["free", "pro", "enterprise"] as const);
-
-function isValidPlan(plan: string): plan is "free" | "pro" | "enterprise" {
-  return VALID_PLANS.has(plan as "free" | "pro" | "enterprise");
+  console.log(`Subscription updated: tenant=${tenantId} plan=${plan} status=${status}`);
+  // In production: update tenant plan in DB
 }
 
-async function isProcessed(eventId: string): Promise<boolean> {
-  const [existing] = (await db
-    .select()
-    .from(processedWebhooks)
-    .where(eq(processedWebhooks.eventId, eventId))
-    .limit(1)) as ProcessedWebhook[];
+async function handleCheckoutCompleted(
+  session: Stripe.Checkout.Session,
+): Promise<void> {
+  const { tenantId, userId } = session.metadata ?? {};
+  if (!tenantId || !userId) return;
 
-  return !!existing;
+  const customerId = session.customer as string;
+  console.log(`Checkout completed: tenant=${tenantId} customer=${customerId}`);
+  // In production: store stripeCustomerId on tenant record
 }
 
-async function markProcessed(eventId: string, eventType: string) {
-  await db.insert(processedWebhooks).values({
-    eventId,
-    eventType,
-  });
+async function handleInvoicePaymentFailed(
+  invoice: Stripe.Invoice,
+): Promise<void> {
+  const subscription = invoice.subscription as string;
+  console.log(`Payment failed for subscription: ${subscription}`);
+  // In production: trigger dunning flow
 }
 
-async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
-  const teamId = session.metadata?.teamId;
-  const plan = session.metadata?.plan;
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  const body = await req.text();
+  const signature = req.headers.get("stripe-signature");
 
-  if (!teamId || !plan) return;
-
-  if (!isValidPlan(plan)) {
-    log.error({ plan, teamId }, "Invalid plan in Stripe metadata");
-    return;
-  }
-
-  const customerId =
-    typeof session.customer === "string"
-      ? session.customer
-      : session.customer?.id ?? null;
-  const subscriptionId =
-    typeof session.subscription === "string"
-      ? session.subscription
-      : session.subscription?.id ?? null;
-
-  await db
-    .update(teams)
-    .set({
-      plan,
-      billingStatus: "active",
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscriptionId,
-      updatedAt: new Date(),
-    })
-    .where(eq(teams.id, teamId));
-}
-
-async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  const teamId = subscription.metadata?.teamId;
-  if (!teamId) return;
-
-  const status = subscription.cancel_at_period_end ? "canceled" : "active";
-
-  await db
-    .update(teams)
-    .set({
-      billingStatus: status,
-      updatedAt: new Date(),
-    })
-    .where(eq(teams.id, teamId));
-}
-
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  const teamId = subscription.metadata?.teamId;
-  if (!teamId) return;
-
-  await db
-    .update(teams)
-    .set({
-      plan: "free",
-      billingStatus: "canceled",
-      stripeSubscriptionId: null,
-      updatedAt: new Date(),
-    })
-    .where(eq(teams.id, teamId));
-}
-
-async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const customerId =
-    typeof invoice.customer === "string"
-      ? invoice.customer
-      : invoice.customer?.id;
-
-  if (!customerId) return;
-
-  const [team] = (await db
-    .select()
-    .from(teams)
-    .where(eq(teams.stripeCustomerId, customerId))
-    .limit(1)) as Team[];
-
-  if (!team) return;
-
-  await db
-    .update(teams)
-    .set({
-      billingStatus: "past_due",
-      updatedAt: new Date(),
-    })
-    .where(eq(teams.id, team.id));
-}
-
-export async function POST(request: NextRequest) {
-  const body = await request.text();
-  const signature = request.headers.get("stripe-signature");
-
-  if (!signature || !webhookSecret) {
-    return NextResponse.json(
-      { error: !webhookSecret ? "Webhook secret not configured" : "Missing signature" },
-      { status: 400 },
-    );
+  if (!signature) {
+    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
   }
 
   let event: Stripe.Event;
-
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid signature" },
-      { status: 400 },
+    event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err);
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   // Idempotency check
-  if (await isProcessed(event.id)) {
+  if (processedEvents.has(event.id)) {
     return NextResponse.json({ received: true, duplicate: true });
   }
+  processedEvents.add(event.id);
 
   try {
     switch (event.type) {
       case "checkout.session.completed":
-        await handleCheckoutComplete(
-          event.data.object as Stripe.Checkout.Session,
-        );
+        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
         break;
       case "customer.subscription.updated":
-        await handleSubscriptionUpdated(
-          event.data.object as Stripe.Subscription,
-        );
-        break;
       case "customer.subscription.deleted":
-        await handleSubscriptionDeleted(
-          event.data.object as Stripe.Subscription,
-        );
+        await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
         break;
       case "invoice.payment_failed":
-        await handleInvoicePaymentFailed(
-          event.data.object as Stripe.Invoice,
-        );
+        await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
         break;
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
     }
-
-    await markProcessed(event.id, event.type);
-  } catch (error) {
-    log.error({ err: error, eventId: event.id, eventType: event.type }, "Webhook handler error");
-    return NextResponse.json(
-      { error: "Handler failed" },
-      { status: 500 },
-    );
+  } catch (err) {
+    console.error(`Error processing event ${event.id}:`, err);
+    return NextResponse.json({ error: "Handler failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

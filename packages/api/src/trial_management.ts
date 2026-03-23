@@ -1,0 +1,1 @@
+// trial-management module\nexport const feature = 'trial-management';

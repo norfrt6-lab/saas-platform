@@ -1,0 +1,1 @@
+// revenue-analytics module\nexport const feature = 'revenue-analytics';

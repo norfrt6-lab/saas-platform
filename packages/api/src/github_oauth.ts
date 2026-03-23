@@ -1,0 +1,1 @@
+// github-oauth module\nexport const feature = 'github-oauth';

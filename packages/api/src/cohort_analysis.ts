@@ -1,0 +1,1 @@
+// cohort-analysis module\nexport const feature = 'cohort-analysis';

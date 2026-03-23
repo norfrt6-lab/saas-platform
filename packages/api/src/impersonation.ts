@@ -1,0 +1,1 @@
+// impersonation module\nexport const feature = 'impersonation';

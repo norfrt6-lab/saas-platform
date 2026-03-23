@@ -1,0 +1,1 @@
+// changelog module\nexport const feature = 'changelog';

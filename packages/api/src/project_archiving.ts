@@ -1,0 +1,1 @@
+// project-archiving module\nexport const feature = 'project-archiving';

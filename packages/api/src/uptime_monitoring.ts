@@ -1,0 +1,1 @@
+// uptime-monitoring module\nexport const feature = 'uptime-monitoring';

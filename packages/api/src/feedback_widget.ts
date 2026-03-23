@@ -1,0 +1,1 @@
+// feedback-widget module\nexport const feature = 'feedback-widget';

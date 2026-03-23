@@ -1,0 +1,1 @@
+// churn-prediction module\nexport const feature = 'churn-prediction';

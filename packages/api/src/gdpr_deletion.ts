@@ -1,0 +1,1 @@
+// gdpr-deletion module\nexport const feature = 'gdpr-deletion';

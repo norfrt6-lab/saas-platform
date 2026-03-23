@@ -1,0 +1,1 @@
+// custom-domains module\nexport const feature = 'custom-domains';

@@ -1,0 +1,1 @@
+// help-center module\nexport const feature = 'help-center';

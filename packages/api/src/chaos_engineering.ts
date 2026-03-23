@@ -1,0 +1,1 @@
+// chaos-engineering module\nexport const feature = 'chaos-engineering';

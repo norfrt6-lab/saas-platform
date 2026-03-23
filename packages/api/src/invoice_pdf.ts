@@ -1,0 +1,1 @@
+// invoice-pdf module\nexport const feature = 'invoice-pdf';

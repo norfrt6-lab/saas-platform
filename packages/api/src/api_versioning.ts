@@ -1,0 +1,1 @@
+// api-versioning module\nexport const feature = 'api-versioning';

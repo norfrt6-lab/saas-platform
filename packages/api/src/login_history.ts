@@ -1,0 +1,1 @@
+// login-history module\nexport const feature = 'login-history';

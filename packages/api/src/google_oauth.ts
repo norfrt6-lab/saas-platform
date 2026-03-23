@@ -1,0 +1,1 @@
+// google-oauth module\nexport const feature = 'google-oauth';

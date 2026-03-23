@@ -1,0 +1,1 @@
+// scheduled-reports module\nexport const feature = 'scheduled-reports';

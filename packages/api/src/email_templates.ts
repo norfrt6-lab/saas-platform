@@ -1,0 +1,1 @@
+// email-templates module\nexport const feature = 'email-templates';

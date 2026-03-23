@@ -1,0 +1,1 @@
+// magic-link-auth module\nexport const feature = 'magic-link-auth';\n

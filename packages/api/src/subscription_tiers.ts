@@ -1,0 +1,1 @@
+// subscription-tiers module\nexport const feature = 'subscription-tiers';

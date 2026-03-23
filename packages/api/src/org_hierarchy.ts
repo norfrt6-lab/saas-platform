@@ -1,0 +1,1 @@
+// org-hierarchy module\nexport const feature = 'org-hierarchy';

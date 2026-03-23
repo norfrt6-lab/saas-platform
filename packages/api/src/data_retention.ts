@@ -1,0 +1,1 @@
+// data-retention module\nexport const feature = 'data-retention';

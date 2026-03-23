@@ -1,0 +1,1 @@
+// log-aggregation module\nexport const feature = 'log-aggregation';

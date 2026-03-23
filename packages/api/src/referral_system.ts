@@ -1,0 +1,1 @@
+// referral-system module\nexport const feature = 'referral-system';

@@ -1,0 +1,1 @@
+// tenant-billing-alerts module\nexport const feature = 'tenant-billing-alerts';

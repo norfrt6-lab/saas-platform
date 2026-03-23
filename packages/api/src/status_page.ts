@@ -1,0 +1,1 @@
+// status-page module\nexport const feature = 'status-page';

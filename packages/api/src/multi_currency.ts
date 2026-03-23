@@ -1,0 +1,1 @@
+// multi-currency module\nexport const feature = 'multi-currency';

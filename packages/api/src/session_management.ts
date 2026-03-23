@@ -1,0 +1,1 @@
+// session-management module\nexport const feature = 'session-management';\n

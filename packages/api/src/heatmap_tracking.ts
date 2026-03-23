@@ -1,0 +1,1 @@
+// heatmap-tracking module\nexport const feature = 'heatmap-tracking';

@@ -1,0 +1,1 @@
+// funnel-analytics module\nexport const feature = 'funnel-analytics';

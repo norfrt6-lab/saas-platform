@@ -1,0 +1,1 @@
+// event-streaming module\nexport const feature = 'event-streaming';

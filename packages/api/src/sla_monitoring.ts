@@ -1,0 +1,1 @@
+// sla-monitoring module\nexport const feature = 'sla-monitoring';

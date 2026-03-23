@@ -1,0 +1,1 @@
+// canary-deployments module\nexport const feature = 'canary-deployments';

@@ -1,0 +1,1 @@
+// password-policy module\nexport const feature = 'password-policy';

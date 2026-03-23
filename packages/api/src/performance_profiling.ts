@@ -1,0 +1,1 @@
+// performance-profiling module\nexport const feature = 'performance-profiling';

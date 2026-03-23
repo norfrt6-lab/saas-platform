@@ -1,0 +1,1 @@
+// tax-calculation module\nexport const feature = 'tax-calculation';

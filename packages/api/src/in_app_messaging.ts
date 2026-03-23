@@ -1,0 +1,1 @@
+// in-app-messaging module\nexport const feature = 'in-app-messaging';

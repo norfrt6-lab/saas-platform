@@ -1,0 +1,1 @@
+// team-permissions module\nexport const feature = 'team-permissions';

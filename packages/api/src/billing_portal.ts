@@ -1,0 +1,1 @@
+// billing-portal module\nexport const feature = 'billing-portal';\n

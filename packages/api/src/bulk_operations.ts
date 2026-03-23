@@ -1,0 +1,1 @@
+// bulk-operations module\nexport const feature = 'bulk-operations';

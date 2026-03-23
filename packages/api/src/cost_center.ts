@@ -1,0 +1,1 @@
+// cost-center module\nexport const feature = 'cost-center';

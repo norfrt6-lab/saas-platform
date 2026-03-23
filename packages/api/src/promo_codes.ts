@@ -1,0 +1,1 @@
+// promo-codes module\nexport const feature = 'promo-codes';
